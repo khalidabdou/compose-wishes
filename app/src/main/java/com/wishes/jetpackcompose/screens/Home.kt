@@ -379,7 +379,7 @@ val tabs = listOf(
         title = R.string.categories,
         icon = Icons.Filled.List,
         screen = {  ->
-            Latest(scrollState =, paddingValues =, latest =, onClick =)
+            Latest(scrollState = "", paddingValues =, latest =, onClick =)
         },
     ),
     TabItem(
