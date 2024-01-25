@@ -82,7 +82,6 @@ class MyApplication : Application(), Application.ActivityLifecycleCallbacks, Lif
         private var loadTime: Long = 0
 
         fun loadAd(context: Context) {
-
             if (!OpenAd.ad_status)
                 return
             // Do not load ad if there is an unused ad or one is already loading.

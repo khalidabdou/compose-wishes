@@ -5,7 +5,13 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -14,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -31,7 +38,7 @@ import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.utlis.AppUtil.getUriImage
 import com.wishes.jetpackcompose.utlis.AppUtil.imagesBitmap
 import com.wishes.jetpackcompose.utlis.AppUtil.shareImageUri
-import com.wishes.jetpackcompose.utlis.Const.Companion.directoryUpload
+import com.wishes.jetpackcompose.utlis.Const.Companion.BASE_URL
 import com.wishes.jetpackcompose.utlis.DEFAULT_RECIPE_IMAGE
 import com.wishes.jetpackcompose.utlis.loadPicture
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
@@ -63,11 +70,13 @@ fun ViewPager(
         ImagesFrom.Fav.route -> {
             viewModel.getFavoritesRoom()
         }
+
         ImagesFrom.ByCat.route -> {
             viewModel.getByCatRoom(CatId!!)
         }
+
         ImagesFrom.Latest.route -> {
-            viewModel.getImagesRoom()
+            //viewModel.getImagesRoom()
         }
     }
 
@@ -77,11 +86,13 @@ fun ViewPager(
         ImagesFrom.Fav.route -> {
             images = viewModel.favoritesList
         }
+
         ImagesFrom.ByCat.route -> {
             images = viewModel.imagesByCategory
         }
+
         ImagesFrom.Latest.route -> {
-            images = viewModel.imageslist
+            images = viewModel.latest.collectAsState().value.data!!.latest
         }
     }
     SideEffect {
@@ -104,8 +115,7 @@ fun ViewPager(
                 Ad_app(app, context)
 
             } else {
-                val url =
-                    directoryUpload + images[page].languageLable + "/" + images[page].image_upload
+                val url = BASE_URL + images[page].url
                 val image = loadPicture(
                     url = url,
                     defaultImage = DEFAULT_RECIPE_IMAGE

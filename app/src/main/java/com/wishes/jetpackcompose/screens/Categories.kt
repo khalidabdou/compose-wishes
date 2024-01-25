@@ -42,7 +42,7 @@ fun Categories(viewModel: ImagesViewModel, navHostController: NavHostController)
     var cats = viewModel.categories.value
 
     LaunchedEffect(Unit) {
-        viewModel.getCategoriesRoom()
+       // viewModel.getCategoriesRoom()
     }
     val categories = viewModel.categoriesList
 

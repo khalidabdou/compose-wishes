@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.runtime.NavRoutes
-import com.wishes.jetpackcompose.utlis.NetworkResults
+import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 import kotlinx.coroutines.delay
 
@@ -42,7 +42,7 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel) {
         targetValue = if (startAnimation) 1f else 0f,
         animationSpec = tween(
             durationMillis = 3000
-        )
+        ), label = ""
     )
 
 //    LaunchedEffect(key1 = true) {
@@ -56,9 +56,10 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel) {
 //    }
 
 
-    if (viewModel.infos.value is NetworkResults.Loading) {
-        viewModel.getAds()
-    } else if (viewModel.infos.value is NetworkResults.Error) {
+    if (viewModel.infos.value is Resource.Loading) {
+        //viewModel.getAds()
+        navController.navigate(NavRoutes.Home.route)
+    } else if (viewModel.infos.value is Resource.Error) {
         LaunchedEffect(key1 = true) {
             viewModel.setMessage(context)
             startAnimation = true
@@ -74,6 +75,7 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel) {
             delay(2000)
             navController.popBackStack()
             navController.navigate(NavRoutes.Home.route)
+
             //Toast.makeText(context, "${viewModel.adsList.value}", Toast.LENGTH_LONG).show()
 
         }

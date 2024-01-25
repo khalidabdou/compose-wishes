@@ -1,79 +1,100 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.example.wishes_jetpackcompose
 
 import android.app.Activity
-import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
+import com.google.accompanist.pager.ExperimentalPagerApi
 import com.wishes.jetpackcompose.R
-import com.wishes.jetpackcompose.admob.showInterstitialAfterClick
-import com.wishes.jetpackcompose.data.entities.Page
-import com.wishes.jetpackcompose.runtime.NavBarItems
 import com.wishes.jetpackcompose.runtime.NavRoutes
-import com.wishes.jetpackcompose.screens.ImagesFrom
+import com.wishes.jetpackcompose.screens.Latest
 import com.wishes.jetpackcompose.screens.NavigationDrawer
 import com.wishes.jetpackcompose.screens.comp.AdBannerApp
 import com.wishes.jetpackcompose.ui.theme.Inter
 import com.wishes.jetpackcompose.utlis.AppUtil
-import com.wishes.jetpackcompose.utlis.Const.Companion.directoryUpload
-import com.wishes.jetpackcompose.utlis.DEFAULT_RECIPE_IMAGE
-import com.wishes.jetpackcompose.utlis.loadPicturetemmp
+import com.wishes.jetpackcompose.utlis.Resource
+import com.wishes.jetpackcompose.utlis.ViewUtils.Companion.customTabIndicatorOffset
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalPagerApi::class,
+    ExperimentalFoundationApi::class
+)
 @ExperimentalCoroutinesApi
 @Composable
 fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
     val scrollState = rememberLazyGridState(0)
     val context = LocalContext.current
     val message = viewModel.message.collectAsState()
+    val latest = viewModel.latest.collectAsState(Resource.Loading())
     val lazyGridState = LazyGridState
     var showAlertDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (viewModel.imageslist.isEmpty()) {
-            viewModel.getImagesRoom()
-        }
-
+        viewModel.getLatestImages()
     }
-
-    val images = viewModel.imageslist
+    val scop = rememberCoroutineScope()
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        initialPageOffsetFraction = 0f
+    ) {
+        3
+    }
 
 
     Surface() {
@@ -119,48 +140,74 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
                 }
             },
             bottomBar = {
-                BottomNavigationBar(navController = navHostController)
+                //BottomNavigationBar(navController = navHostController)
+                TabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                    indicator = { tabPositions ->
+                        TabRowDefaults.Indicator(
+                            modifier = Modifier.customTabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                            height = 5.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    divider = {}
+                ) {
+                    tabs.forEachIndexed { index, item ->
+                        Tab(
+                            selected = index == pagerState.currentPage,
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(text = stringResource(id = item.title))
+                                }
+                            },
+                            onClick = {
+                                Toast.makeText(context, index.toString(), Toast.LENGTH_SHORT).show()
+                                scop.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
+                            },
+                        )
+                    }
+                }
             },
 
+
             ) {
-            LazyVerticalGrid(modifier = Modifier
-                .fillMaxSize()
-                .padding(it),
-                state = scrollState,
-                columns = GridCells.Fixed(2),
-                content = {
-                    if (images.isEmpty()) {
-                        items(15) {
-                            LoadingShimmerEffectImage()
-                        }
-                    } else {
-                        items(images.size) {
+            Latest(
+                scrollState = scrollState, paddingValues = it, latest.value
+            ) {
+                navHostController.currentBackStackEntry?.savedStateHandle?.set(
+                    key = "page",
+                    value = it
+                )
+                navHostController.navigate(NavRoutes.ViewPager.route)
+            }
 
-                            val image: MutableState<Bitmap?>? = loadPicturetemmp(
-                                url = directoryUpload + images[it].languageLable + "/" + images[it].image_upload,
-                                defaultImage = DEFAULT_RECIPE_IMAGE
+            HorizontalPager(
+                state = pagerState,
+                pageContent = { page ->
+                    when (page) {
+                        0 -> {
+                            tabs[0].screen(
+
                             )
-                            ImageItem(
-                                image?.value?.asImageBitmap(),
-                            ) {
-                                val page = Page(
-                                    page = it,
-                                    imagesList = ImagesFrom.Latest.route,
-                                    null
-                                )
-                                navHostController.currentBackStackEntry?.savedStateHandle?.set(
-                                    key = "page",
-                                    value = page
-                                )
+                        }
 
-                                navHostController.navigate(NavRoutes.ViewPager.route)
-                            }
+                        1 -> {
 
+                            tabs[1].screen(
 
+                            )
+                        }
 
+                        2 -> {
+                            tabs[2].screen(
+
+                            )
                         }
                     }
-                })
+                }
+            )
 
             if (showAlertDialog) {
                 AlertDialog(
@@ -204,147 +251,13 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
             }
         }
     }
-
-
 }
 
-
-@Composable
-fun ImageItem(painter: ImageBitmap?, onClick: () -> Unit) {
-    val context = LocalContext.current
-    Card(
-        modifier = Modifier
-            .padding(4.dp)
-            .fillMaxWidth()
-            .height(200.dp)
-            .clickable {
-                onClick()
-                showInterstitialAfterClick(context)
-            },
-    ) {
-        if (painter == null) {
-            Image(
-                painter = painterResource(id = R.drawable.holder), contentDescription = null,
-                modifier = Modifier.fillMaxWidth(),
-                contentScale = ContentScale.Crop
-            )
-        } else
-            Image(
-                bitmap = painter, contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-    }
-}
-
-@Composable
-fun LoadingShimmerEffectImage() {
-    //These colors will be used on the brush. The lightest color should be in the middle
-    val gradient = listOf(
-        MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f), //darker grey (90% opacity)
-        MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f), //lighter grey (30% opacity)
-        MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f)
-    )
-
-    val transition = rememberInfiniteTransition() // animate infinite times
-
-    val translateAnimation = transition.animateFloat( //animate the transition
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 1000, // duration for the animation
-                easing = FastOutLinearInEasing
-            )
-        )
-    )
-    val brush = Brush.linearGradient(
-        colors = gradient,
-        start = Offset(200f, 200f),
-        end = Offset(
-            x = translateAnimation.value,
-            y = translateAnimation.value
-        )
-    )
-    ShimmerGridItemImage(brush = brush)
-}
-
-@Composable
-fun ShimmerGridItemImage(brush: Brush) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(all = 6.dp), verticalAlignment = Alignment.Top
-    ) {
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(brush)
-        )
-    }
-}
-
-
-@Composable
-fun BottomNavigationBar(navController: NavHostController) {
-
-    Column {
-        BottomNavigation(
-            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant),
-        ) {
-            val backStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = backStackEntry?.destination?.route
-
-            NavBarItems.BarItems.forEach { navItem ->
-                BottomNavigationItem(
-                    selected = currentRoute == navItem.route,
-                    modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer),
-                    onClick = {
-                        navController.navigate(navItem.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                inclusive = true
-                            }
-                        }
-                    },
-
-                    icon = {
-                        Icon(
-                            imageVector = navItem.image,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            contentDescription = navItem.title
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = navItem.title,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontFamily = Inter
-                            )
-                        )
-                    },
-                )
-            }
-        }
-    }
-
-
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(title: String, onDrawer: () -> Unit) {
     val infiniteTransition = rememberInfiniteTransition()
-    val angle by infiniteTransition.animateFloat(
-        initialValue = 0F,
-        targetValue = 360F,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing)
-        )
-    )
-
     TopAppBar(
         modifier = Modifier.clickable { onDrawer() },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -366,10 +279,10 @@ fun TopBar(title: String, onDrawer: () -> Unit) {
                 }
             ) {
                 Icon(
-                    imageVector =  Icons.Default.Settings,
+                    imageVector = Icons.Default.Settings,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     contentDescription = null,
-                    modifier = Modifier.rotate(angle)
+                    modifier = Modifier
                 )
             }
         },
@@ -447,3 +360,33 @@ fun MoreOptionPopup(
     }
 }
 
+data class TabItem(
+    val title: Int,
+    val icon: ImageVector,
+    val screen: @Composable () -> Unit,
+)
+
+
+val tabs = listOf(
+    TabItem(
+        title = R.string.Home,
+        icon = Icons.Filled.Favorite,
+        screen = { ->
+
+        },
+    ),
+    TabItem(
+        title = R.string.categories,
+        icon = Icons.Filled.List,
+        screen = {  ->
+            Latest(scrollState =, paddingValues =, latest =, onClick =)
+        },
+    ),
+    TabItem(
+        title = R.string.fav,
+        icon = Icons.Filled.List,
+        screen = { ->
+
+        },
+    ),
+)

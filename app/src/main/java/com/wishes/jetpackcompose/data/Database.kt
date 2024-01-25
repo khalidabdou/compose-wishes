@@ -13,9 +13,8 @@ import com.wishes.jetpackcompose.utlis.Const.Companion.DATABASE_NAME
 @Database(
     entities = [
         Image::class,
-        Category::class,
     ],
-    version = 16,
+    version = 1,
     exportSchema = false
 )
 @TypeConverters(imageTypeConverter::class)

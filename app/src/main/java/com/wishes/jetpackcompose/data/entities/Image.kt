@@ -13,20 +13,19 @@ import kotlinx.android.parcel.Parcelize
 data class Image(
     @PrimaryKey
     var id: Int,
-    val image_upload: String?,
-    val cat_id: Int,
-    val count_view: Int,
-    val download_count: Int,
-    val count_shared: Int,
+    val url: String?,
+    val categoryId: Int,
+    val viewCount: Int,
+    val downloadCount: Int,
+    val shareCount: Int,
     var isfav: Int?,
-    val count_fav: Int?,
-    val language_app: Int,
+    val likeCount: Int?,
+    val language_app: Int?,
     @SerializedName("language")
-    val languageLable: String
+    val languageLable: String?
 
 ) : Parcelable
 
-data class Images(
-    @SerializedName("latest")
-    val results: List<Image>
+data class Latest(
+    val latest: List<Image>
 )

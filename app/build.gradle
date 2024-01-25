@@ -5,17 +5,20 @@ plugins {
     id 'kotlin-parcelize'
     id 'dagger.hilt.android.plugin'
     id 'com.google.gms.google-services'
+    id 'androidx.room'
 }
-
+room {
+    schemaDirectory "$projectDir/schemas"
+}
 android {
     namespace 'com.wishes.jetpackcompose'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         //applicationId "com.wishes2.wishes.thailands"
-        applicationId "com.wishes2.wishes.chinese"
+        applicationId "com.wishes2.wishes.thailands"
         minSdk 23
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -39,17 +42,18 @@ android {
     
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17'
     }
     buildFeatures {
         compose true
+        buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.1.1'
+        kotlinCompilerExtensionVersion '1.4.1'
     }
     packagingOptions {
         resources {
@@ -60,30 +64,31 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
-    implementation 'androidx.activity:activity-compose:1.3.1'
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.activity:activity-compose:1.8.2'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    implementation 'androidx.compose.material3:material3:1.1.0-alpha02'
-    implementation 'com.google.android.gms:play-services-ads-lite:21.3.0'
+    implementation 'androidx.compose.material3:material3:1.1.2'
+    implementation 'com.google.android.gms:play-services-ads-lite:22.6.0'
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
 
-    implementation "androidx.navigation:navigation-compose:2.5.0"
-    implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
+    implementation "androidx.navigation:navigation-compose:2.7.6"
+    implementation "androidx.hilt:hilt-navigation-compose:1.1.0"
 
-    implementation 'androidx.navigation:navigation-compose:2.4.0'
+    implementation 'androidx.navigation:navigation-compose:2.7.6'
     // Room components
-    implementation "androidx.room:room-runtime:2.3.0"
-    kapt "androidx.room:room-compiler:2.3.0"
-    implementation "androidx.room:room-ktx:2.3.0"
-    androidTestImplementation "androidx.room:room-testing:2.3.0"
+    def room_version = "2.6.1"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    androidTestImplementation "androidx.room:room-testing:$room_version"
 
 
     implementation "androidx.compose.material:material:$compose_version"
@@ -91,19 +96,25 @@ dependencies {
 
     //implementation("io.coil-kt:coil-compose:2.2.2")
     //implementation("io.coil-kt:coil-compose:2.2.2")
-
+    //data store
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     //viewpager
     implementation "com.google.accompanist:accompanist-pager:0.24.13-rc"
 
 
     implementation 'androidx.annotation:annotation:1.2.0'
     // Gson (To convert raw JSON to pretty JSON)
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.code.gson:gson:2.10'
 
-    // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation "com.squareup.okhttp3:logging-interceptor:4.5.0"
+    def ktor_version = "1.6.3"
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-serialization:$ktor_version")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
+    implementation("io.ktor:ktor-client-android:$ktor_version")
+    implementation("ch.qos.logback:logback-classic:1.2.6")
+    implementation("io.ktor:ktor-client-websockets:$ktor_version")
+    implementation("io.ktor:ktor-client-okhttp:$ktor_version")
+    implementation("io.ktor:ktor-client-json:$ktor_version")
 
     // Dagger - Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
@@ -114,7 +125,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+
 
 
     def glide = "4.11.0"
@@ -125,7 +136,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-messaging'
 
-    implementation 'com.google.android.gms:play-services-ads:21.3.0'
+    implementation 'com.google.android.gms:play-services-ads:22.6.0'
 
 
     implementation 'com.facebook.android:audience-network-sdk:6.12.0'

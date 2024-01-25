@@ -29,6 +29,7 @@ import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.data.entities.Page
 import com.wishes.jetpackcompose.runtime.NavRoutes
 import com.wishes.jetpackcompose.screens.ImagesFrom
+import com.wishes.jetpackcompose.screens.comp.ImageItem
 import com.wishes.jetpackcompose.utlis.Const
 import com.wishes.jetpackcompose.utlis.DEFAULT_RECIPE_IMAGE
 import com.wishes.jetpackcompose.utlis.loadPicture
@@ -94,7 +95,7 @@ fun Favorites(viewModel: ImagesViewModel, navHostController: NavHostController) 
 //
 //                    )
                     val image = loadPicture(
-                        url = Const.directoryUpload + images[it].languageLable + "/" + images[it].image_upload,
+                        url = Const.BASE_URL + images[it].url,
                         defaultImage = DEFAULT_RECIPE_IMAGE
                     ).value
                     image?.let { img ->
