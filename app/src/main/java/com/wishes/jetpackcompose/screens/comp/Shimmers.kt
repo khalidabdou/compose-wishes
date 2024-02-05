@@ -26,9 +26,9 @@ import androidx.compose.ui.unit.dp
 fun LoadingShimmerEffectImage() {
     //These colors will be used on the brush. The lightest color should be in the middle
     val gradient = listOf(
-        MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f), //darker grey (90% opacity)
-        MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f), //lighter grey (30% opacity)
-        MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f)
+        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f), //darker grey (90% opacity)
+        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f), //lighter grey (30% opacity)
+        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f)
     )
 
     val transition = rememberInfiniteTransition() // animate infinite times

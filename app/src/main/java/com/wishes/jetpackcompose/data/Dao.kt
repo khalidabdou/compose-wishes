@@ -16,10 +16,24 @@ interface IDao {
     suspend fun insertToFavorites(image: Image)
 
 
+    @Query("DELETE FROM tbl_images WHERE id =:id")
+    suspend fun removeFromFav(id: Int)
 
 
 
+    @Query("SELECT EXISTS(SELECT 1 FROM tbl_images WHERE id = :id)")
+    suspend fun isImageFavorited(id: Int): Boolean
 
+
+    suspend fun toggleFavoriteStatus(image: Image) {
+        if (isImageFavorited(image.id)) {
+            // If the image is already favorited, remove it from favorites
+            removeFromFav(image.id)
+        } else {
+            // If the image is not in favorites, add it
+            insertToFavorites(image)
+        }
+    }
 
 //    @Insert(onConflict = OnConflictStrategy.IGNORE)
 //    suspend fun insertImages(images: List<Image>): List<Long>
@@ -63,8 +77,11 @@ interface IDao {
 //    @Query("SELECT * FROM tbl_images WHERE categoryId=:catID AND language_app=:languageID")
 //    fun readImagesByCategory(catID: Int, languageID: Int): Flow<List<Image>>
 //
-//    @Query("SELECT * FROM tbl_images WHERE isfav=1")
-//    fun getFavoriteImages(): Flow<List<Image>>
+    @Query("SELECT * FROM tbl_images")
+    fun getFavoriteImages(): Flow<List<Image>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertImage(image: Image)
 //
 //    @Query("Delete FROM tbl_category")
 //    suspend fun deleteAllCatImage()

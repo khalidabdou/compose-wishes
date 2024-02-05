@@ -1,6 +1,7 @@
 package com.wishes.jetpackcompose.utlis
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 object JSONConverter {
 
@@ -12,7 +13,15 @@ object JSONConverter {
     }
 
     // Convert JSON string to a generic object
+//    inline fun <reified T> jsonToObject(json: String): T? {
+//        return gson.fromJson(json, T::class.java)
+//    }
     inline fun <reified T> jsonToObject(json: String): T? {
-        return gson.fromJson(json, T::class.java)
+        return if (T::class.java == List::class.java) {
+            gson.fromJson(json, object : TypeToken<T>() {}.type)
+        } else {
+            gson.fromJson(json, T::class.java)
+        }
     }
+
 }

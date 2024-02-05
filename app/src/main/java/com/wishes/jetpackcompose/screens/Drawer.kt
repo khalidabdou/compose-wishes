@@ -27,20 +27,20 @@ fun NavigationDrawer(onClick: () -> Unit) {
     val context = LocalContext.current
     Box(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize().background(MaterialTheme.colorScheme.onBackground),
     ) {
         Column() {
             Box(
                 modifier = Modifier
                     .height(100.dp)
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .background(MaterialTheme.colorScheme.onBackground),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = context.getString(R.string.app_name),
                     style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = MaterialTheme.colorScheme.background
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -99,11 +99,12 @@ fun ItemDrawer(text: String, icon: ImageVector, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(20.dp))
-        Icon(icon, contentDescription = "")
+        Icon(icon, contentDescription = "", tint =  MaterialTheme.colorScheme.background)
         Spacer(modifier = Modifier.width(20.dp))
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.background
         )
     }
 

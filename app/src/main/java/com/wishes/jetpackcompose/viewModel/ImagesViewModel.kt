@@ -7,12 +7,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.data.entities.Ads
 import com.wishes.jetpackcompose.data.entities.App
-import com.wishes.jetpackcompose.data.entities.Categories
 import com.wishes.jetpackcompose.data.entities.Category
 import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.data.entities.Latest
@@ -36,11 +34,25 @@ class ImagesViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
     val LOG_IMAGE: String = "response_image"
 
-
-
+    enum class VIEW_PAGER {
+        LATEST,
+        FAVORITES,
+        BY_CATEGORY
+        // Add other types as necessary
+    }
 
     private val _images = MutableStateFlow<Resource<Latest>>(Resource.Loading())
     val latest: StateFlow<Resource<Latest>> = _images.asStateFlow()
+
+    var currentViewPagerType by mutableStateOf<VIEW_PAGER>(VIEW_PAGER.LATEST)
+
+    private val _imagesByCategory = MutableStateFlow<Resource<Latest>>(Resource.Loading())
+    val imagesByCategory: StateFlow<Resource<Latest>> = _imagesByCategory.asStateFlow()
+
+
+    private val _favorites = MutableStateFlow<Resource<Latest>>(Resource.Idle())
+    val favorites: StateFlow<Resource<Latest>> = _favorites.asStateFlow()
+
 
     private val _categories = MutableStateFlow<Resource<List<Category>>>(Resource.Loading())
     val categories: StateFlow<Resource<List<Category>>> = _categories.asStateFlow()
@@ -50,70 +62,97 @@ class ImagesViewModel @Inject constructor(
     val infos = mutableStateOf<Resource<Ads>>(Resource.Loading())
     val apps = mutableStateOf<List<App>?>(null)
 
+
+    //viewpager
+    var currentPage by mutableStateOf<Int>(0)
+    var currentListImage = MutableStateFlow<Resource<Latest>>(Resource.Loading())
+
     private val _message = MutableStateFlow<String>("Good Morning")
     val message: StateFlow<String> get() = _message
 
-    /**ROOM DATABASE**/
-    var catId: Int = 0
-    var byLatest by mutableStateOf(emptyList<Image>())
-    var categoriesList by mutableStateOf(emptyList<Category>())
-    var favoritesList by mutableStateOf(emptyList<Image>())
-    var imagesByCategory by mutableStateOf(emptyList<Image>())
+    val isImageFavorited = MutableStateFlow<Boolean>(false)
 
-
-    fun getLatestImages() {
+    fun getLatestImages(page: Int=0) {
         viewModelScope.launch {
-            val params = HashMap<String,Any>()
+            val params = HashMap<String, Any>()
             imageRepo.getImages(params).collect {
                 _images.emit(it)
             }
         }
     }
 
-    fun getCategories() = viewModelScope.launch {
+    fun getImageByCategory(categoryId: Int) {
         viewModelScope.launch {
-            val params = HashMap<String,Any>()
-            imageRepo.getCategories(params).collect {
-                _categories.emit(it)
+            val params = HashMap<String, Any>()
+            imageRepo.getImageByCategory(params, categoryId).collect {
+                _imagesByCategory.emit(it)
+            }
+        }
+    }
+
+    fun getCategories() {
+        viewModelScope.launch {
+            viewModelScope.launch {
+                val params = HashMap<String, Any>()
+                imageRepo.getCategories(params).collect {
+                    _categories.emit(it)
+                }
             }
         }
     }
 
     fun getFavoritesRoom() = viewModelScope.launch(Dispatchers.IO) {
-//        imageRepo.local.getFavoriteImages().collect {
-//            favoritesList = it
-//        }
-    }
-
-    fun getByCatRoom(id: Int) = viewModelScope.launch(Dispatchers.IO) {
-//        imageRepo.local.getImagesByCat(id, LANGUAGE_ID).collect {
-//            imagesByCategory = it
-//        }
-    }
-
-
-    private suspend fun getCategoriesSafeCall() {
-
-        //categories.value=NetworkResults.Loading()
-    }
-
-
-    fun addToFav(id: Int, fav: Int) {
-
-    }
-
-    fun getImages() {
-        viewModelScope.launch {
-            getImagesSafeCall()
+        imageRepo.getFavorites().collect {
+            val latest: Latest = Latest(it)
+            _favorites.emit(Resource.Success(latest))
         }
     }
 
-    private suspend fun getImagesSafeCall() {
+
+    fun addToFav(image: Image) {
+        viewModelScope.launch {
+            isImageFavorited.emit(!isImageFavorited.value)
+            imageRepo.addToFav(image)
+        }
     }
 
-    private fun offlineCacheImages(images: List<Image>) {
-
+    fun removeFromFav(image: Image) {
+        viewModelScope.launch {
+            imageRepo.removeFromFav(image)
+        }
     }
+
+    fun checkIfImageFavorited(image: Image) {
+        viewModelScope.launch {
+            isImageFavorited.value = imageRepo.isImageInFav(image)
+        }
+    }
+
+    fun setImagesForViewPager(type: VIEW_PAGER) {
+        currentViewPagerType = type
+        when (type) {
+            VIEW_PAGER.LATEST -> {
+                viewModelScope.launch {
+                    currentListImage.emit(_images.value)
+                }
+            }
+
+            VIEW_PAGER.FAVORITES -> {
+                viewModelScope.launch {
+                    currentListImage.emit(_favorites.value)
+                }
+            }
+
+            VIEW_PAGER.BY_CATEGORY -> {
+                viewModelScope.launch {
+                    currentListImage.emit(_imagesByCategory.value)
+                }
+            }
+
+        }
+    }
+
+    //suspend fun isFav(): Boolean = imageRepo.isImageInFav(currentListImage!!.get(currentPage!!))
 
 
     fun setMessage(context: Context) {
@@ -137,22 +176,12 @@ class ImagesViewModel @Inject constructor(
             }
 
         }
-//        if (timeOfDay in 0..11) {
-//            _message.value = context.getString(R.string.morning)
-//            //message = "Good Morning"
-//        } else if (timeOfDay in 12..15) {
-//            _message.value = context.getString(R.string.afternoon)
-//            //message = "Good Afternoon"
-//        } else if (timeOfDay in 16..20) {
-//            _message.value = context.getString(R.string.evening)
-//            //message = "Good Evening"
-//        } else if (timeOfDay in 21..23) {
-//            _message.value = context.getString(R.string.night)
-//            //message = "Good Night"
-//        }
+
+
     }
 
 
     fun hasInternetConnection(): Boolean = hasConnection(getApplication())
+
 
 }

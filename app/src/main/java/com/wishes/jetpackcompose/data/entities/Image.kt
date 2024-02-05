@@ -27,5 +27,5 @@ data class Image(
 ) : Parcelable
 
 data class Latest(
-    val latest: List<Image>
+    val images: List<Image>
 )

@@ -1,6 +1,8 @@
 package com.wishes.jetpackcompose.runtime
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,10 +30,10 @@ fun NavigationHost(navController: NavHostController,viewModel: ImagesViewModel) 
         }
 
         composable(NavRoutes.Favorites.route) {
-            Favorites(viewModel, navController)
+            Favorites(viewModel, navController, PaddingValues())
         }
         composable(NavRoutes.Categories.route) {
-            Categories(viewModel, navController)
+            Categories(viewModel, navController, PaddingValues())
         }
         composable(NavRoutes.Splash.route) {
             Splash(navController,viewModel)

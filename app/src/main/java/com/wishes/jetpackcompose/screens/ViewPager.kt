@@ -1,6 +1,9 @@
 package com.wishes.jetpackcompose.screens
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,12 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -34,18 +39,21 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.admob.showInterstitialAfterClick
+import com.wishes.jetpackcompose.data.entities.App
 import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.utlis.AppUtil.getUriImage
 import com.wishes.jetpackcompose.utlis.AppUtil.imagesBitmap
 import com.wishes.jetpackcompose.utlis.AppUtil.shareImageUri
 import com.wishes.jetpackcompose.utlis.Const.Companion.BASE_URL
 import com.wishes.jetpackcompose.utlis.DEFAULT_RECIPE_IMAGE
+import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.utlis.loadPicture
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.random.Random
 
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalPagerApi::class, ExperimentalCoroutinesApi::class)
 @Composable
 fun ViewPager(
@@ -56,65 +64,73 @@ fun ViewPager(
     CatId: Int?
 ) {
     val context = LocalContext.current
-//    val imageLoader = ImageLoader.Builder(context)
-//        .diskCache {
-//            DiskCache.Builder()
-//                .directory(context.cacheDir.resolve("image_cache"))
-//                .maxSizePercent(0.02)
-//                .build()
-//        }
-//        .build()
 
 
-    when (route) {
-        ImagesFrom.Fav.route -> {
-            viewModel.getFavoritesRoom()
+    val images = viewModel.currentListImage.collectAsState(initial = Resource.Loading())
+
+
+    when (images.value) {
+        is Resource.Idle -> {
+            Toast.makeText(context, "idle", Toast.LENGTH_SHORT).show()
         }
 
-        ImagesFrom.ByCat.route -> {
-            viewModel.getByCatRoom(CatId!!)
+        is Resource.Loading -> {
+            Toast.makeText(context, "loading", Toast.LENGTH_SHORT).show()
         }
 
-        ImagesFrom.Latest.route -> {
-            //viewModel.getImagesRoom()
-        }
-    }
-
-
-    var images = emptyList<Image>()
-    when (route) {
-        ImagesFrom.Fav.route -> {
-            images = viewModel.favoritesList
-        }
-
-        ImagesFrom.ByCat.route -> {
-            images = viewModel.imagesByCategory
+        is Resource.Success -> {
+            ViewPagerImages(
+                images = images.value.data!!.images,
+                page = page,
+                apps = emptyList(),
+                context = context,
+                viewModel = viewModel
+            ) {
+                viewModel.addToFav(it)
+            }
         }
 
-        ImagesFrom.Latest.route -> {
-            images = viewModel.latest.collectAsState().value.data!!.latest
+        is Resource.Error -> {
+            Toast.makeText(context, "error", Toast.LENGTH_SHORT).show()
         }
     }
-    SideEffect {
-        //Toast.makeText(context,"re",Toast.LENGTH_LONG).show()
-    }
+}
 
-
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun ViewPagerImages(
+    images: List<Image>,
+    page: Int?,
+    apps: List<App>,
+    context: Context,
+    viewModel: ImagesViewModel,
+    addOrRemoveFromFav: (Image) -> Unit
+) {
     Column() {
-        //var imageBitmap: Bitmap?=null
-        val currentPage = page ?: 0
+        var currentPage = page ?: 0
         val pagerState = rememberPagerState(currentPage)
-        val apps = viewModel.apps.value
+        val scope = rememberCoroutineScope()
+        val isFav = viewModel.isImageFavorited.collectAsState()
+
+        LaunchedEffect(key1 = images[pagerState.currentPage] , block = {
+            viewModel.checkIfImageFavorited(images[pagerState.currentPage])
+            Log.d("fav", isFav.value.toString())
+        })
+
+
         HorizontalPager(
             modifier = Modifier.weight(9f),
             count = images.size,
             state = pagerState
         ) { page ->
+
             if (page % 21 == 0 && !apps.isNullOrEmpty()) {
                 val app = apps.get(Random.nextInt(0, apps.size))
                 Ad_app(app, context)
 
             } else {
+                currentPage = page
+
                 val url = BASE_URL + images[page].url
                 val image = loadPicture(
                     url = url,
@@ -144,15 +160,15 @@ fun ViewPager(
                 .padding(6.dp)
         ) {
 
-            Action(stringResource(R.string.fav), Icons.Default.Favorite) {
-                viewModel.addToFav(images[pagerState.currentPage].id, 1)
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.add_fav),
-                    Toast.LENGTH_LONG
-                ).show()
+            Action(
+                stringResource(R.string.fav),
+                if (isFav.value) (Icons.Default.Favorite) else (Icons.Default.FavoriteBorder)
+            ) {
+                addOrRemoveFromFav(images[pagerState.currentPage])
                 showInterstitialAfterClick(context)
             }
+
+
             /*Action("Download", Icons.Outlined.KeyboardArrowDown) {
                 Toast.makeText(context,"Download success",Toast.LENGTH_LONG).show()
             }*/

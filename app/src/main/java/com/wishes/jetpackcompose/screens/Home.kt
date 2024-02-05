@@ -1,7 +1,7 @@
 package com.example.wishes_jetpackcompose
 
 import android.app.Activity
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -9,8 +9,12 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -84,11 +88,19 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
     val message = viewModel.message.collectAsState()
     val latest = viewModel.latest.collectAsState(Resource.Loading())
     val lazyGridState = LazyGridState
+    var isCategoriesSelected by remember {
+        mutableStateOf(false)
+    }
+    var isDrawerOpen by remember { mutableStateOf(false) }
     var showAlertDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.getLatestImages()
+        viewModel.getLatestImages(page = 0)
     }
-    val scop = rememberCoroutineScope()
+
+    LaunchedEffect(isCategoriesSelected) {
+        Log.d("images", "selected")
+    }
+    val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0f
@@ -96,34 +108,34 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
         3
     }
 
-
     Surface() {
         BackHandler() {
             showAlertDialog = true
         }
-
         //create animations
-        var navigateClick by remember { mutableStateOf(false) }
+
         val offSetAnim by animateDpAsState(
-            targetValue = if (navigateClick) 300.dp else 0.dp,
-            tween(1000)
+            targetValue = if (isDrawerOpen) 300.dp else 0.dp,
+            tween(1000), label = ""
         )
         val clipDp by animateDpAsState(
-            targetValue = if (navigateClick) 60.dp else 0.dp,
-            tween(1000)
+            targetValue = if (isDrawerOpen) 20.dp else 0.dp,
+            tween(1000), label = ""
         )
         val scaleAnim by animateFloatAsState(
-            targetValue = if (navigateClick) 0.5f else 1.0f,
-            tween(1000)
+            targetValue = if (isDrawerOpen) 0.5f else 1.0f,
+            tween(1000), label = ""
         )
 
         val rotate by animateFloatAsState(
-            targetValue = if (navigateClick) 10f else 0f,
-            tween(1000)
+            targetValue = if (isDrawerOpen) 10f else 0f,
+            tween(1000), label = ""
         )
 
         NavigationDrawer() {
-            navigateClick = false
+            scope.launch {
+                isDrawerOpen = false
+            }
         }
 
         Scaffold(
@@ -132,77 +144,95 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
                 .scale(scaleAnim)
                 .offset(x = offSetAnim)
                 .rotate(rotate)
-                .clip(RoundedCornerShape(clipDp)),
+                .clip(RoundedCornerShape(clipDp))
+                .clickable(indication = null,
+                    interactionSource = remember { MutableInteractionSource() } // This is mandatory
+                ) {
+                    if (isDrawerOpen)
+                        isDrawerOpen = !isDrawerOpen
+                },
             contentColor = MaterialTheme.colorScheme.background,
             topBar = {
                 TopBar(message.value) {
-                    navigateClick = !navigateClick
+                    scope.launch {
+                        isDrawerOpen = !isDrawerOpen
+                    }
                 }
             },
             bottomBar = {
                 //BottomNavigationBar(navController = navHostController)
-                TabRow(
-                    selectedTabIndex = pagerState.currentPage,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.Indicator(
-                            modifier = Modifier.customTabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                            height = 5.dp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    divider = {}
-                ) {
-                    tabs.forEachIndexed { index, item ->
-                        Tab(
-                            selected = index == pagerState.currentPage,
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(text = stringResource(id = item.title))
-                                }
-                            },
-                            onClick = {
-                                Toast.makeText(context, index.toString(), Toast.LENGTH_SHORT).show()
-                                scop.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                        )
+                Column {
+                    TabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        indicator = { tabPositions ->
+                            TabRowDefaults.Indicator(
+                                modifier = Modifier.customTabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                                height = 5.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        divider = {}
+                    ) {
+                        tabs.forEachIndexed { index, item ->
+                            Tab(
+                                selected = index == pagerState.currentPage,
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(text = stringResource(id = item.title))
+                                    }
+                                },
+                                onClick = {
+                                    if (isDrawerOpen)
+                                        isDrawerOpen = !isDrawerOpen
+                                    else
+                                        scope.launch {
+                                            pagerState.animateScrollToPage(index)
+                                        }
+                                },
+                            )
+                        }
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
+
             },
 
 
             ) {
-            Latest(
-                scrollState = scrollState, paddingValues = it, latest.value
-            ) {
-                navHostController.currentBackStackEntry?.savedStateHandle?.set(
-                    key = "page",
-                    value = it
-                )
-                navHostController.navigate(NavRoutes.ViewPager.route)
-            }
 
             HorizontalPager(
                 state = pagerState,
                 pageContent = { page ->
                     when (page) {
                         0 -> {
-                            tabs[0].screen(
-
-                            )
+                            Latest(
+                                scrollState = scrollState,
+                                paddingValues = it,
+                                latest = latest.value
+                            ) {
+                                viewModel.setImagesForViewPager(ImagesViewModel.VIEW_PAGER.LATEST)
+                                navHostController.currentBackStackEntry?.savedStateHandle?.set(
+                                    key = "page",
+                                    value = it
+                                )
+                                navHostController.navigate(NavRoutes.ViewPager.route)
+                            }
                         }
 
                         1 -> {
 
-                            tabs[1].screen(
-
+                            Categories(
+                                viewModel = viewModel,
+                                navHostController = navHostController,
+                                it
                             )
                         }
 
                         2 -> {
-                            tabs[2].screen(
-
+                            Favorites(
+                                viewModel = viewModel,
+                                navHostController = navHostController,
+                                it
                             )
                         }
                     }
@@ -379,7 +409,7 @@ val tabs = listOf(
         title = R.string.categories,
         icon = Icons.Filled.List,
         screen = {  ->
-            Latest(scrollState = , paddingValues =, latest =, onClick =)
+
         },
     ),
     TabItem(

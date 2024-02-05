@@ -1,9 +1,26 @@
 package com.example.wishes_jetpackcompose
 
-import androidx.compose.animation.core.*
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,8 +42,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.wishes.jetpackcompose.runtime.NavRoutes
-import com.wishes.jetpackcompose.utlis.Const.Companion.directoryUploadCat
+import com.wishes.jetpackcompose.utlis.Const
 import com.wishes.jetpackcompose.utlis.DEFAULT_RECIPE_IMAGE
+import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.utlis.loadPicture
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,53 +52,61 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
-fun Categories(viewModel: ImagesViewModel, navHostController: NavHostController) {
+fun Categories(
+    viewModel: ImagesViewModel,
+    navHostController: NavHostController,
+    paddingValues: PaddingValues,
+) {
     val scaffoldState = rememberScaffoldState()
-
     val context = LocalContext.current
+    var categories = viewModel.categories.collectAsState()
 
+    LaunchedEffect(categories.value.data?.size) {
 
-    var cats = viewModel.categories.value
+        if (categories.value.data.isNullOrEmpty()){
+            Log.d("images", "categories")
+            viewModel.getCategories()
+        }
 
-    LaunchedEffect(Unit) {
-       // viewModel.getCategoriesRoom()
     }
-    val categories = viewModel.categoriesList
 
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        if (categories.isEmpty()) {
-            item {
-                repeat(10) {
-                    LoadingShimmerEffect()
-                }
-            }
-        } else {
-            items(categories.size) {
-
-                val category = categories[it]
-//                val imageLoader = ImageLoader.Builder(context)
-//                    .diskCache {
-//                        DiskCache.Builder()
-//                            .directory(context.cacheDir.resolve("image_cache"))
-//                            .maxSizePercent(0.02)
-//                            .build()
-//                    }
-//                    .build()
-
-//                val painter = rememberAsyncImagePainter(
-//                    model = directoryUploadCat + category.image,
-//                    imageLoader = imageLoader,
-//                    contentScale = ContentScale.Inside
-//                )
-                val image = loadPicture(
-                    url = directoryUploadCat + category.image,
-                    defaultImage = DEFAULT_RECIPE_IMAGE
-                ).value
-                image?.let { img ->
-                    ItemCategory(category.name, img.asImageBitmap()) {
-                        navHostController.navigate(NavRoutes.ByCat.route + "/" + category.id)
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        when (categories.value) {
+            is Resource.Success -> {
+                items(categories.value.data!!.size) {
+                    val category = categories.value.data!![it]
+                    val fixedImageUrl = category.image_url.replace("\\", "/")
+                    //Log.d("images",Const.BASE_URL + "/"+category.image_url)
+                    val image = loadPicture(
+                        url = Const.BASE_URL + "/" + fixedImageUrl,
+                        defaultImage = DEFAULT_RECIPE_IMAGE
+                    ).value
+                    image?.let { img ->
+                        ItemCategory(category.name, img.asImageBitmap()) {
+                            navHostController.navigate(NavRoutes.ByCat.route + "/" + category.id)
+                        }
                     }
                 }
+            }
+
+            is Resource.Loading -> {
+                item {
+                    repeat(10) {
+                        LoadingShimmerEffect()
+                    }
+                }
+            }
+
+            is Resource.Error -> {
+                Toast.makeText(context, "try later", Toast.LENGTH_SHORT).show()
+            }
+
+            else -> {
+
             }
         }
     }

@@ -16,7 +16,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 
 
-val DEFAULT_RECIPE_IMAGE = R.drawable.holder
+val DEFAULT_RECIPE_IMAGE = R.drawable.placeholder
 
 @SuppressLint("UnrememberedMutableState")
 @ExperimentalCoroutinesApi

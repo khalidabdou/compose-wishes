@@ -32,7 +32,7 @@ fun ImageItem(painter: ImageBitmap?, onClick: () -> Unit) {
     ) {
         if (painter == null) {
             Image(
-                painter = painterResource(id = R.drawable.holder), contentDescription = null,
+                painter = painterResource(id = R.drawable.placeholder), contentDescription = null,
                 modifier = Modifier.fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
