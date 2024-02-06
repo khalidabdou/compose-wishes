@@ -55,10 +55,7 @@ class MainActivity : ComponentActivity() {
                                 AdvertViewAdmob()
 
                     }
-
                 }
-
-
             }
         }
     }

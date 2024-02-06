@@ -3,11 +3,13 @@ package com.wishes.jetpackcompose.data.repositories
 
 import android.util.Log
 import com.wishes.jetpackcompose.BuildConfig.PACKAGE_NAME
+import com.wishes.jetpackcompose.data.entities.AppDetails
 import com.wishes.jetpackcompose.data.entities.Category
 import com.wishes.jetpackcompose.data.entities.Latest
 import com.wishes.jetpackcompose.data.interfaces.ImageInterface
 import com.wishes.jetpackcompose.utlis.ClientApiManager
-import com.wishes.jetpackcompose.utlis.Const.Companion.GAT_CATEGORIES
+import com.wishes.jetpackcompose.utlis.Const.Companion.GET_APP_DETAILS
+import com.wishes.jetpackcompose.utlis.Const.Companion.GET_CATEGORIES
 import com.wishes.jetpackcompose.utlis.Const.Companion.GET_IMAGES_BY_CATEGORY
 import com.wishes.jetpackcompose.utlis.Const.Companion.GET_LATEST
 import com.wishes.jetpackcompose.utlis.JSONConverter
@@ -22,8 +24,9 @@ class RemoteDataSource @Inject constructor(
 ) : ImageInterface {
     val TAG= "Images"
     override suspend fun getImages(params: HashMap<String, Any>): Flow<Resource<Latest>> = flow {
+        val offset = params["offset"] as Int? ?: 0
         apiManager.makeRequest(
-            url = GET_LATEST(appPackage = PACKAGE_NAME),
+            url = GET_LATEST(appPackage = PACKAGE_NAME, offset = offset),
             bodyMap = null,
             useBearer = true,
             multiPartForm = null,
@@ -50,6 +53,7 @@ class RemoteDataSource @Inject constructor(
             }
         )
     }
+
     override suspend fun getImagesByCategory(
         params: HashMap<String, Any>,
         categoryId: Int
@@ -86,7 +90,7 @@ class RemoteDataSource @Inject constructor(
     override suspend fun getCategories(params: HashMap<String, Any>): Flow<Resource<List<Category>>> =
         flow {
             apiManager.makeRequest(
-                url = GAT_CATEGORIES(packageName = PACKAGE_NAME, language = "English"),
+                url = GET_CATEGORIES(packageName = PACKAGE_NAME, language = "English"),
                 bodyMap = null,
                 useBearer = true,
                 multiPartForm = null,
@@ -113,14 +117,47 @@ class RemoteDataSource @Inject constructor(
                 }
             )
         }
+
+
+    override suspend fun getAppDetails(): Flow<Resource<AppDetails>> =
+
+        flow {
+            Log.d("app", "begin")
+            apiManager.makeRequest(
+                url = GET_APP_DETAILS(packageName = PACKAGE_NAME),
+                bodyMap = null,
+                useBearer = true,
+                multiPartForm = null,
+                reqMethod = HttpMethod.Get,
+                successCallbackObject = { jsonResponse ->
+                    Log.d("app", "Success Cate$jsonResponse")
+
+                    // Directly parse the JSON response to Latest object
+                    val homeObject: AppDetails? =
+                        JSONConverter.jsonToObject<AppDetails>(jsonResponse.toString())
+                    // Check if homeObject and its list are not null before accessing
+                    if (homeObject != null) {
+                        Log.d("app", "Success list $homeObject")
+                        emit(Resource.Success(homeObject))
+                    } else {
+                        Log.d("app", "Latest images list is empty or null")
+                        emit(Resource.Error("No images found", null))
+                    }
+                },
+                failureCallback = { error ->
+                    Log.e("app", " " + error.errorBody?.toString() + error.message?.toString())
+                    emit(Resource.Error(error.message, errorBody = error.errorBody))
+                }
+            )
+        }
+
     override suspend fun incShareImg(params: HashMap<String, Any>): Flow<Resource<Unit>> {
         TODO("Not yet implemented")
     }
+
     override suspend fun incViewsImg(params: HashMap<String, Any>): Flow<Resource<Unit>> {
         TODO("Not yet implemented")
     }
-
-
 
 
 }

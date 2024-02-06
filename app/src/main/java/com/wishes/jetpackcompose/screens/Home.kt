@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -87,14 +86,15 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
     val context = LocalContext.current
     val message = viewModel.message.collectAsState()
     val latest = viewModel.latest.collectAsState(Resource.Loading())
-    val lazyGridState = LazyGridState
+    val appDetails = viewModel.appDetails.collectAsState()
+
     var isCategoriesSelected by remember {
         mutableStateOf(false)
     }
     var isDrawerOpen by remember { mutableStateOf(false) }
     var showAlertDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.getLatestImages(page = 0)
+        viewModel.getLatestImages()
     }
 
     LaunchedEffect(isCategoriesSelected) {
@@ -208,7 +208,10 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
                             Latest(
                                 scrollState = scrollState,
                                 paddingValues = it,
-                                latest = latest.value
+                                latest = latest.value,
+                                loadMore = {
+                                    viewModel.loadMore()
+                                }
                             ) {
                                 viewModel.setImagesForViewPager(ImagesViewModel.VIEW_PAGER.LATEST)
                                 navHostController.currentBackStackEntry?.savedStateHandle?.set(
@@ -251,8 +254,7 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
                         )
                     },
                     text = {
-                        val apps = viewModel.apps.value
-
+                        val apps = appDetails.value.data?.advertisements
                         if (!apps.isNullOrEmpty()) {
                             val app = apps.get(Random.nextInt(0, apps.size))
                             AdBannerApp(app)

@@ -24,7 +24,7 @@ fun ByCat(viewModel: ImagesViewModel, navHostController: NavHostController, catI
         viewModel.getImageByCategory(catId)
     }
 
-    Latest(scrollState = scrollState, paddingValues = PaddingValues(), latest = images.value) {
+    Latest(scrollState = scrollState, paddingValues = PaddingValues(), latest = images.value, loadMore = {}) {
         viewModel.setImagesForViewPager(ImagesViewModel.VIEW_PAGER.BY_CATEGORY)
         navHostController.currentBackStackEntry?.savedStateHandle?.set(
             key = "page",

@@ -34,7 +34,7 @@ fun Ad_app(app: App,context:Context) {
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             val image = loadPicture(
-                url = app.image,
+                url = app.iconUrl,
                 defaultImage = DEFAULT_RECIPE_IMAGE
             ).value
 
@@ -47,7 +47,7 @@ fun Ad_app(app: App,context:Context) {
                     contentScale = ContentScale.Crop
                 )
             }
-            Text(text = "${app.title}",
+            Text(text = "${app.name}",
                 modifier = Modifier.padding(9.dp), textAlign = TextAlign.Center)
             OutlinedButton(
                 modifier = Modifier,
@@ -56,7 +56,9 @@ fun Ad_app(app: App,context:Context) {
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 onClick = {
-                    AppUtil.openUrl(context,app.url)
+                    app.appUrl?.let {
+                        AppUtil.openUrl(context,it)
+                    }
                 }
             ) {
                 Text(

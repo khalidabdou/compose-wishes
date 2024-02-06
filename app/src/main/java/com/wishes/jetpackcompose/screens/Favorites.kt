@@ -37,7 +37,8 @@ fun Favorites(
     Latest(
         scrollState = scrollState,
         paddingValues = paddingValues,
-        latest = favorites.value
+        latest = favorites.value,
+        loadMore = {}
     ) {
         viewModel.setImagesForViewPager(ImagesViewModel.VIEW_PAGER.FAVORITES)
         navHostController.currentBackStackEntry?.savedStateHandle?.set(

@@ -1,6 +1,7 @@
 package com.wishes.jetpackcompose.data.interfaces
 
 
+import com.wishes.jetpackcompose.data.entities.AppDetails
 import com.wishes.jetpackcompose.data.entities.Category
 import com.wishes.jetpackcompose.data.entities.Latest
 import com.wishes.jetpackcompose.utlis.Resource
@@ -20,5 +21,7 @@ interface ImageInterface {
 
     suspend fun incViewsImg(params: HashMap<String, Any>): Flow<Resource<Unit>>
 
+
+    suspend fun getAppDetails (): Flow<Resource<AppDetails>>
 
 }

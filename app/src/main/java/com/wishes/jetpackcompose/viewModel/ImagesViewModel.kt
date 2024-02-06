@@ -9,11 +9,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.wishes.jetpackcompose.R
-import com.wishes.jetpackcompose.data.entities.App
+import com.wishes.jetpackcompose.data.entities.AppDetails
 import com.wishes.jetpackcompose.data.entities.Category
 import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.data.entities.Latest
 import com.wishes.jetpackcompose.repo.ImagesRepo
+import com.wishes.jetpackcompose.utlis.AdsUtil
 import com.wishes.jetpackcompose.utlis.Const.Companion.hasConnection
 import com.wishes.jetpackcompose.utlis.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -56,10 +57,10 @@ class ImagesViewModel @Inject constructor(
     private val _categories = MutableStateFlow<Resource<List<Category>>>(Resource.Loading())
     val categories: StateFlow<Resource<List<Category>>> = _categories.asStateFlow()
 
-    var offset by mutableStateOf(30)
+    var offset by mutableStateOf(0)
 
-    val infos = mutableStateOf<Resource<Ads>>(Resource.Loading())
-    val apps = mutableStateOf<List<App>?>(null)
+    private val _appDetails = MutableStateFlow<Resource<AppDetails>>(Resource.Loading())
+    val appDetails: StateFlow<Resource<AppDetails>> = _appDetails.asStateFlow()
 
 
     //viewpager
@@ -71,7 +72,7 @@ class ImagesViewModel @Inject constructor(
 
     val isImageFavorited = MutableStateFlow<Boolean>(false)
 
-    fun getLatestImages(page: Int=0) {
+    fun getLatestImages() {
         viewModelScope.launch {
             val params = HashMap<String, Any>()
             imageRepo.getImages(params).collect {
@@ -79,6 +80,42 @@ class ImagesViewModel @Inject constructor(
             }
         }
     }
+
+    fun loadMore() {
+        viewModelScope.launch {
+            val offset = _images.value.data?.images?.size ?: 0
+            val params = HashMap<String, Any>().apply {
+                put("offset", offset)
+            }
+            imageRepo.getImages(params).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        val currentImages = _images.value.data?.images ?: emptyList()
+                        val newImages = result.data?.images ?: emptyList()
+                        val allImages = currentImages + newImages
+                        _images.emit(
+                            Resource.Success(
+                                _images.value.data?.copy(images = allImages) ?: result.data
+                            )
+                        )
+                    }
+
+                    is Resource.Error -> {
+                        // Handle error case
+                    }
+
+                    is Resource.Loading -> {
+                        // Handle loading state if necessary
+                    }
+
+                    else -> {
+
+                    }
+                }
+            }
+        }
+    }
+
 
     fun getImageByCategory(categoryId: Int) {
         viewModelScope.launch {
@@ -99,6 +136,7 @@ class ImagesViewModel @Inject constructor(
             }
         }
     }
+
 
     fun getFavoritesRoom() = viewModelScope.launch(Dispatchers.IO) {
         imageRepo.getFavorites().collect {
@@ -153,6 +191,21 @@ class ImagesViewModel @Inject constructor(
 
     //suspend fun isFav(): Boolean = imageRepo.isImageInFav(currentListImage!!.get(currentPage!!))
 
+    fun getAppDetails() {
+        viewModelScope.launch {
+            imageRepo.getAppDetails().collect() {
+                if (it is Resource.Success) {
+                    if (!it.data?.advertisements.isNullOrEmpty()) {
+                        it.data?.ads!!.forEach {
+                            AdsUtil.makeAd(it)
+                        }
+                    }
+                }
+                _appDetails.emit(it)
+
+            }
+        }
+    }
 
     fun setMessage(context: Context) {
         val c: Calendar = Calendar.getInstance()

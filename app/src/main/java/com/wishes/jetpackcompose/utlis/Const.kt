@@ -26,10 +26,14 @@ class Const {
 
         //endpoints
         //images
-        fun GET_LATEST (appPackage :String) = BASE_URL + "/images/latest/$appPackage"
-        fun GET_IMAGES_BY_CATEGORY (categoryId :Int) = BASE_URL + "/images/category/$categoryId"
-        fun GAT_CATEGORIES(packageName: String, language: String) =
+        fun GET_LATEST(appPackage: String, offset: Int = 0) =
+            BASE_URL + "/images/latest/$appPackage/?offset=$offset"
+
+        fun GET_IMAGES_BY_CATEGORY(categoryId: Int) = BASE_URL + "/images/category/$categoryId"
+        fun GET_CATEGORIES(packageName: String, language: String) =
             "$BASE_URL/category/categories/$packageName/$language"
+
+        fun GET_APP_DETAILS (packageName: String) = BASE_URL + "/app/$packageName/details"
 
 
         var LANGUAGE_ID: Int = 4

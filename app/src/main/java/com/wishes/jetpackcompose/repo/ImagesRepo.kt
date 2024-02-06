@@ -41,7 +41,9 @@ class ImagesRepo @Inject constructor(
         return localDataSource.removeFromFav(image)
     }
 
-    suspend fun isImageInFav(image: Image):Boolean = localDataSource.isImageInFav(image)
+    suspend fun isImageInFav(image: Image): Boolean = localDataSource.isImageInFav(image)
 
+
+    suspend fun getAppDetails() = remoteDataSource.getAppDetails()
 
 }

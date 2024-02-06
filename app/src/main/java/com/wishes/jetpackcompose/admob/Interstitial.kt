@@ -10,7 +10,10 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.wishes.jetpackcompose.data.entities.AdFactory
+import com.wishes.jetpackcompose.data.entities.AdProvider
+import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.Inter
+import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.InterApplovin
+import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.InterFAN
 import com.wishes.jetpackcompose.utlis.Const.Companion.applovinClass
 import com.wishes.jetpackcompose.utlis.findActivity
 
@@ -24,13 +27,13 @@ val showAd = 10
 fun loadInterstitial(context: Context) {
     InterstitialAd.load(
         context,
-        AdFactory.interstitialAd.pub_id,
+        Inter.pubId,
         AdRequest.Builder().build(),
         object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 mInterstitialAd = null
                 Log.d("MainActivity", adError.message)
-                AdFactory.interstitialAd.showAd = false
+                Inter.showAd = false
             }
 
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
@@ -47,13 +50,14 @@ fun showInterstitialAfterClick(context: Context) {
 
     countShow++
     //Log.d("MainActivity", "$countShow")
-
-    if (AdFactory.interstitialAd.showAd) {
+    Log.d("ads", Inter.toString())
+    if (Inter.showAd) {
         //Log.d("MainActivity", "Ad admob.")
+
         if (mInterstitialAd == null) {
             loadInterstitial(context)
         }
-        if (countShow % AdFactory.interstitialAd.adCount!! != 0) {
+        if (countShow % Inter.adCount!! != 0) {
             return
         }
 
@@ -77,12 +81,16 @@ fun showInterstitialAfterClick(context: Context) {
             }
         mInterstitialAd?.show(activity!!)
 
-    } else if (AdFactory.interstitialFanAd.showAd) {
+    } else if (InterFAN.showAd) {
         //Log.d("MainActivity", "Ad fan.")
         Facebook.showInterstitial(context as Activity)
-    } else if (AdFactory.interstitialApplovinAd.showAd) {
+    } else if (InterApplovin.showAd) {
+
         applovinClass.createInterstitialAd(context)
         applovinClass.show(context)
+
+        Log.d("applovinad","show")
+
     }
 }
 

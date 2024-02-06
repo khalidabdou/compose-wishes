@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -25,13 +24,13 @@ import com.wishes.jetpackcompose.utlis.Const
 import com.wishes.jetpackcompose.utlis.DEFAULT_RECIPE_IMAGE
 import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.utlis.loadPicturetemmp
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun Latest(
     scrollState: LazyGridState,
     paddingValues: PaddingValues,
     latest: Resource<Latest>,
+    loadMore: () -> Unit,
     onClick: (Page) -> Unit
 ) {
 
@@ -44,6 +43,7 @@ fun Latest(
         if (itemCount > 0 && scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == itemCount - 1) {
             Log.d("scrolling", "${scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index}")
             //load more
+            loadMore()
         }
     }
 

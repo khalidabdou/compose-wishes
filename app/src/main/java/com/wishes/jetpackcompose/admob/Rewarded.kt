@@ -8,19 +8,19 @@ import com.google.android.gms.ads.*
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.wishes.jetpackcompose.data.entities.AdFactory
+import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.Rewarded
 import com.wishes.jetpackcompose.utlis.findActivity
 
 private var mRewardedAd: RewardedAd? = null
 
 fun loadRewarded(context: Context) {
 
-    if (!AdFactory.rewardedAd.showAd)
+    if (!Rewarded.showAd)
         return
     var adRequest = AdRequest.Builder().build()
     RewardedAd.load(
         context,
-        AdFactory.rewardedAd.pub_id,
+        Rewarded.pubId,
         adRequest,
         object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {

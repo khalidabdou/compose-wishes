@@ -21,7 +21,7 @@ fun NavigationHost(navController: NavHostController,viewModel: ImagesViewModel) 
 
     NavHost(
         navController = navController,
-        startDestination = NavRoutes.Home.route,
+        startDestination = NavRoutes.Splash.route,
     ) {
 
 

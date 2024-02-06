@@ -3,35 +3,102 @@ package com.wishes.jetpackcompose.data.entities
 import com.google.gson.annotations.SerializedName
 
 data class Ad(
-    var id: Int,
-    var adTypeId: String,
-    var pub_id: String,
+    val id: Int,
+    val adCount: Int? = 10,
     var showAd: Boolean,
-    var adCount: Int?,
-    )
-
-data class Setting(
-    @SerializedName("package")
-    val package_name: String,
-    val dynamic_link: String,
-    val email: String
+    @SerializedName("pub_id") val pubId: String,
+    val adType: String,
+    val adPlatform: String
 )
 
 
-data class AppAdContainer(
+data class AppDetails(
+    val id: Int,
+    val name: String,
+    @SerializedName("appPackage") val appPackage: String,
+    val description: String?,
+    val iconUrl: String?,
+    val largePhotoUrl: String?,
+    val privacyUrl: String?,
     val ads: List<Ad>,
-    val AppAdvertisements: List<App>
+    val advertisements: List<App>,
+    val advertisedBy: List<App>
 )
 
-object AdFactory {
 
-    val bannerAd = Ad(0, "banner", "banner", false, null)
-    val interstitialAd = Ad(0, "inter", "inter", true, 3)
-    val openAd = Ad(0, "open", "open", false, null)
-    val rewardedAd = Ad(0, "rewarded", "rewarded", false, null)
+class AdProvider {
+    companion object {
+        var Banner: Ad = Ad(
+            id = 0,
+            pubId = "your_pub_id_for_Banner",
+            adType = "banner",
+            showAd = false,
+            adCount = null,
+            adPlatform = "AdMob"
+        )
 
-    val bannerFanAd = Ad(0, "banner_fan", "banner_fan", false, null)
-    val interstitialFanAd = Ad(0, "inter_fan", "inter_fan", false, 10)
-    val bannerApplovinAd = Ad(0, "banner_applovin", "banner_applovin", false, null)
-    val interstitialApplovinAd = Ad(0, "inter_Applovin", "inter_Applovin", false, 10)
+        var Inter: Ad = Ad(
+            id = 0,
+            pubId = "your_pub_id_for_Inter",
+            adType = "inter",
+            showAd = true,
+            adCount = 3,
+            adPlatform = "AdMob"
+        )
+
+        var OpenAd: Ad = Ad(
+            id = 0,
+            pubId = "your_pub_id_for_OpenAd",
+            adType = "open",
+            showAd = false,
+            adCount = null,
+            adPlatform = "AdMob"
+        )
+
+        var Rewarded: Ad = Ad(
+            id = 0,
+            pubId = "your_pub_id_for_Reward",
+            adType = "rewarded",
+            showAd = false,
+            adCount = null,
+            adPlatform = "AdMob"
+        )
+
+        var BannerFAN: Ad = Ad(
+            id = 0,
+            pubId = "",
+            adType = "banner_fan",
+            showAd = false,
+            adCount = null,
+            adPlatform = "FAN"
+        )
+
+        var InterFAN: Ad = Ad(
+            id = 0,
+            pubId = "",
+            adType = "inter_fan",
+            showAd = false,
+            adCount = 10,
+            adPlatform = "FAN"
+        )
+
+        var BannerApplovin: Ad = Ad(
+            id = 0,
+            pubId = "",
+            adType = "banner_applovin",
+            showAd = false,
+            adCount = null,
+            adPlatform = "Applovin"
+        )
+
+        var InterApplovin: Ad = Ad(
+            id = 0,
+            pubId = "",
+            adType = "inter_applovin",
+            showAd = false,
+            adCount = 10,
+            adPlatform = "Applovin"
+        )
+    }
 }
+

@@ -1,10 +1,15 @@
 package com.wishes.jetpackcompose
 
 
+
 import android.app.Activity
+import android.app.AlarmManager
 import android.app.Application
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -12,9 +17,12 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.applovin.sdk.AppLovinSdk
 import com.applovin.sdk.AppLovinSdkConfiguration
 import com.facebook.ads.AdSettings
+
+
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.appopen.AppOpenAd
-import com.wishes.jetpackcompose.data.entities.AdFactory.openAd
+import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.OpenAd
+
 import dagger.hilt.android.HiltAndroidApp
 import java.util.*
 
@@ -30,6 +38,7 @@ class MyApplication : Application(), Application.ActivityLifecycleCallbacks, Lif
     }
 
 
+
     override fun onCreate() {
         super.onCreate()
 
@@ -40,8 +49,8 @@ class MyApplication : Application(), Application.ActivityLifecycleCallbacks, Lif
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         appOpenAdManager = AppOpenAdManager()
         AdSettings.addTestDevice("2fc9747b-b77b-4c23-9ae0-53c42d39afbd")
-        AppLovinSdk.getInstance(this).setMediationProvider("max")
-        AppLovinSdk.getInstance(this).initializeSdk({ configuration: AppLovinSdkConfiguration ->
+        AppLovinSdk.getInstance( this ).setMediationProvider( "max" )
+        AppLovinSdk.getInstance( this ).initializeSdk({ configuration: AppLovinSdkConfiguration ->
 
         })
 
@@ -73,7 +82,7 @@ class MyApplication : Application(), Application.ActivityLifecycleCallbacks, Lif
         private var loadTime: Long = 0
 
         fun loadAd(context: Context) {
-            if (!openAd.showAd)
+            if (!OpenAd.showAd)
                 return
             // Do not load ad if there is an unused ad or one is already loading.
             if (isLoadingAd || isAdAvailable()) {
@@ -84,7 +93,7 @@ class MyApplication : Application(), Application.ActivityLifecycleCallbacks, Lif
             val request = AdRequest.Builder().build()
             AppOpenAd.load(
                 context,
-                openAd.pub_id,
+                OpenAd.pubId,
                 request,
                 AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
                 object : AppOpenAd.AppOpenAdLoadCallback() {
