@@ -23,9 +23,8 @@ import com.applovin.mediation.ads.MaxAdView
 import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.google.android.gms.ads.*
-import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.Banner
-import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.BannerApplovin
-import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.BannerFAN
+import com.wishes.jetpackcompose.data.entities.AdFactory
+import com.wishes.jetpackcompose.data.entities.AdFactory.bannerAd
 
 
 @Composable
@@ -44,7 +43,7 @@ fun AdvertViewAdmob(modifier: Modifier = Modifier) {
             color = White,
             text = "",
         )
-    } else if (state && Banner.ad_status) {
+    } else if (state && bannerAd.showAd) {
         AndroidView(
             modifier = modifier
                 .fillMaxWidth()
@@ -54,7 +53,7 @@ fun AdvertViewAdmob(modifier: Modifier = Modifier) {
             factory = { context ->
                 AdView(context).apply {
                     setAdSize(AdSize.BANNER)
-                    adUnitId = Banner.ad_id
+                    adUnitId = bannerAd.pub_id
                     loadAd(AdRequest.Builder().build())
                     adListener = object : AdListener() {
                         override fun onAdClicked() {
@@ -87,7 +86,7 @@ fun AdvertViewAdmob(modifier: Modifier = Modifier) {
                 }
             }
         )
-    } else if (BannerFAN.ad_status && stateFb) {
+    } else if (AdFactory.bannerFanAd.showAd && stateFb) {
         val adListenerfb: com.facebook.ads.AdListener = object : com.facebook.ads.AdListener {
             override fun onError(p0: Ad?, p1: AdError?) {
                 stateFb = false
@@ -116,14 +115,14 @@ fun AdvertViewAdmob(modifier: Modifier = Modifier) {
             factory = { context ->
                 com.facebook.ads.AdView(
                     context,
-                    BannerFAN.ad_id,
+                    AdFactory.bannerFanAd.pub_id,
                     com.facebook.ads.AdSize.BANNER_HEIGHT_50
                 ).apply {
                     loadAd(buildLoadAdConfig().withAdListener(adListenerfb).build())
                 }
             }
         )
-    } else if (BannerApplovin.ad_status) {
+    } else if (AdFactory.bannerApplovinAd.showAd) {
         val adListenerMax: MaxAdViewAdListener = object : MaxAdViewAdListener {
             override fun onAdLoaded(ad: MaxAd?) {
                 TODO("Not yet implemented")
@@ -165,7 +164,7 @@ fun AdvertViewAdmob(modifier: Modifier = Modifier) {
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(top = 4.dp, bottom = 4.dp),
             factory = { context ->
-                MaxAdView(BannerApplovin.ad_id, context).apply {
+                MaxAdView(AdFactory.bannerApplovinAd.pub_id, context).apply {
                     loadAd()
                     setListener(adListenerMax)
                 }
@@ -177,7 +176,7 @@ fun AdvertViewAdmob(modifier: Modifier = Modifier) {
 
 @Composable
 fun AdvertViewFAN(modifier: Modifier = Modifier) {
-    Log.d("FAN", BannerFAN.ad_id)
+    Log.d("FAN", AdFactory.bannerFanAd.pub_id)
     AndroidView(
         modifier = modifier
             .fillMaxWidth()
@@ -186,7 +185,7 @@ fun AdvertViewFAN(modifier: Modifier = Modifier) {
         factory = { context ->
             com.facebook.ads.AdView(
                 context,
-                BannerFAN.ad_id,
+                AdFactory.bannerFanAd.pub_id,
                 com.facebook.ads.AdSize.BANNER_HEIGHT_50
             ).apply {
                 loadAd()

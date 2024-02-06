@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.wishes.jetpackcompose.R
-import com.wishes.jetpackcompose.data.entities.Ads
 import com.wishes.jetpackcompose.data.entities.App
 import com.wishes.jetpackcompose.data.entities.Category
 import com.wishes.jetpackcompose.data.entities.Image

@@ -8,7 +8,7 @@ import com.applovin.mediation.MaxAd
 import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxInterstitialAd
-import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.InterApplovin
+import com.wishes.jetpackcompose.data.entities.AdFactory
 import java.util.concurrent.TimeUnit
 
 class applovin : MaxAdListener {
@@ -19,7 +19,7 @@ class applovin : MaxAdListener {
 
     fun createInterstitialAd(context: Context) {
         if (!this::interstitialAd.isInitialized) {
-            interstitialAd = MaxInterstitialAd(InterApplovin.ad_id, context as Activity)
+            interstitialAd = MaxInterstitialAd(AdFactory.interstitialApplovinAd.pub_id, context as Activity)
             interstitialAd.setListener(this)
             // Load the first ad
             interstitialAd.loadAd()
@@ -27,13 +27,11 @@ class applovin : MaxAdListener {
         if (!interstitialAd.isReady)
             interstitialAd.loadAd()
 
-
     }
 
     // MAX Ad Listener
     override fun onAdLoaded(maxAd: MaxAd) {
         // Interstitial ad is ready to be shown. interstitialAd.isReady() will now return 'true'
-
         // Reset retry attempt
         Log.d("applovinad", "onAdLoaded")
         retryAttempt = 0.0
@@ -67,8 +65,7 @@ class applovin : MaxAdListener {
     fun show(context: Context) {
         if (interstitialAd.isReady) {
             Log.d("applovinad", "show2 " + countShow.toString())
-
-            if (countShow % InterApplovin.show_count!! == 0)
+            if (countShow % AdFactory.interstitialApplovinAd.adCount!! == 0)
                 interstitialAd.showAd()
         } else {
             createInterstitialAd(context)

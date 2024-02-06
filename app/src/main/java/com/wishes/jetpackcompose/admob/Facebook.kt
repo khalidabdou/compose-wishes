@@ -5,7 +5,7 @@ import com.facebook.ads.Ad
 import com.facebook.ads.AdError
 import com.facebook.ads.InterstitialAd
 import com.facebook.ads.InterstitialAdListener
-import com.wishes.jetpackcompose.data.entities.AdProvider.Companion.InterFAN
+import com.wishes.jetpackcompose.data.entities.AdFactory
 import com.wishes.jetpackcompose.utlis.Const.Companion.applovinClass
 
 
@@ -25,7 +25,7 @@ class Facebook {
                 loadInterstitialFAN(activity)
                 return
             }
-            if (countShow % InterFAN.show_count!! != 0) {
+            if (countShow % AdFactory.interstitialFanAd.adCount!! != 0) {
                 return
             }
             interstitialAd.show()
@@ -35,13 +35,13 @@ class Facebook {
         fun loadInterstitialFAN(activity: Activity) {
             interstitialAd = InterstitialAd(
                 activity,
-                InterFAN.ad_id
+                AdFactory.interstitialFanAd.pub_id
             )
             val interstitialAdListener: InterstitialAdListener = object : InterstitialAdListener {
                 override fun onError(p0: Ad?, p1: AdError?) {
 
                     applovinClass.createInterstitialAd(activity)
-                    InterFAN.ad_status = false
+                    AdFactory.interstitialFanAd.showAd = false
                 }
 
                 override fun onAdLoaded(inter: Ad?) {

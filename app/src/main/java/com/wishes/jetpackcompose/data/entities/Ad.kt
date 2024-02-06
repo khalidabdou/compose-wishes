@@ -4,11 +4,10 @@ import com.google.gson.annotations.SerializedName
 
 data class Ad(
     var id: Int,
-    var ad_id: String,
-    var type: String,
-    var ad_status: Boolean,
-    var show_count: Int?,
-
+    var adTypeId: String,
+    var pub_id: String,
+    var showAd: Boolean,
+    var adCount: Int?,
     )
 
 data class Setting(
@@ -19,75 +18,20 @@ data class Setting(
 )
 
 
-data class Ads(
-    @SerializedName(value = "admobe", alternate = ["ads"])
+data class AppAdContainer(
     val ads: List<Ad>,
-
-    @SerializedName("apps")
-    val apps: List<App>
+    val AppAdvertisements: List<App>
 )
 
-class AdProvider {
+object AdFactory {
 
-    companion object {
-        var Banner: Ad = Ad(
-            0,
-            "",
-            "banner",
-            false,
-            null,
-        )
-        var Inter: Ad = Ad(
-            0,
-            "",
-            "inter",
-            true,
-            3,
-        )
-        var OpenAd: Ad = Ad(
-            0,
-            "",
-            "open",
-            false,
-            null,
-        )
-        var Rewarded: Ad = Ad(
-            0,
-            "",
-            "rewarded",
-            false,
-            null,
-        )
+    val bannerAd = Ad(0, "banner", "banner", false, null)
+    val interstitialAd = Ad(0, "inter", "inter", true, 3)
+    val openAd = Ad(0, "open", "open", false, null)
+    val rewardedAd = Ad(0, "rewarded", "rewarded", false, null)
 
-
-        var BannerFAN: Ad = Ad(
-            0,
-            "",
-            "banner_fan",
-            false,
-            null,
-        )
-        var InterFAN: Ad = Ad(
-            0,
-            "",
-            "inter_fan",
-            false,
-            10,
-        )
-        var BannerApplovin: Ad = Ad(
-            0,
-            "",
-            "banner_applovin",
-            false,
-            null,
-        )
-        var InterApplovin: Ad = Ad(
-            0,
-            "",
-            "inter_Applovin",
-            false,
-            10,
-        )
-        //banner_applovin
-    }
+    val bannerFanAd = Ad(0, "banner_fan", "banner_fan", false, null)
+    val interstitialFanAd = Ad(0, "inter_fan", "inter_fan", false, 10)
+    val bannerApplovinAd = Ad(0, "banner_applovin", "banner_applovin", false, null)
+    val interstitialApplovinAd = Ad(0, "inter_Applovin", "inter_Applovin", false, 10)
 }
