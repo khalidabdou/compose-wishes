@@ -14,6 +14,7 @@ data class App(
     val description: String,
     val largePhotoUrl: String,
     val privacyUrl: String,
+    val callToAction :String?
 )
 
 

@@ -1,5 +1,6 @@
 package com.example.wishes_jetpackcompose
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,24 +67,29 @@ import com.wishes.jetpackcompose.runtime.NavRoutes
 import com.wishes.jetpackcompose.screens.Latest
 import com.wishes.jetpackcompose.screens.NavigationDrawer
 import com.wishes.jetpackcompose.screens.comp.AdBannerApp
+import com.wishes.jetpackcompose.screens.comp.Ads.MyAppNativeSmallAdComposable
+import com.wishes.jetpackcompose.screens.comp.Ads.NativeAdComposable
+import com.wishes.jetpackcompose.screens.comp.Ads.NativeSmallAdComposable
 import com.wishes.jetpackcompose.ui.theme.Inter
 import com.wishes.jetpackcompose.utlis.AppUtil
 import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.utlis.ViewUtils.Companion.customTabIndicatorOffset
+import com.wishes.jetpackcompose.viewModel.AdsViewModel
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalPagerApi::class,
     ExperimentalFoundationApi::class
 )
 @ExperimentalCoroutinesApi
 @Composable
-fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
-    val scrollState = rememberLazyGridState(0)
+fun Home(viewModel: ImagesViewModel,adsViewModel: AdsViewModel, navHostController: NavHostController) {
+    val scrollState = rememberLazyListState(0)
     val context = LocalContext.current
     val message = viewModel.message.collectAsState()
     val latest = viewModel.latest.collectAsState(Resource.Loading())
@@ -132,7 +139,7 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
             tween(1000), label = ""
         )
 
-        NavigationDrawer() {
+        NavigationDrawer(appDetails = viewModel.appDetails.value.data) {
             scope.launch {
                 isDrawerOpen = false
             }
@@ -209,6 +216,8 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
                                 scrollState = scrollState,
                                 paddingValues = it,
                                 latest = latest.value,
+                                showLoadMore = viewModel.showProgressLoadMore,
+                                adsViewModel = adsViewModel,
                                 loadMore = {
                                     viewModel.loadMore()
                                 }
@@ -225,8 +234,9 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
                         1 -> {
 
                             Categories(
-                                viewModel = viewModel,
                                 navHostController = navHostController,
+                                viewModel = viewModel,
+                                adsViewModel = adsViewModel,
                                 it
                             )
                         }
@@ -235,7 +245,8 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
                             Favorites(
                                 viewModel = viewModel,
                                 navHostController = navHostController,
-                                it
+                                adsViewModel = adsViewModel,
+                               paddingValues =  it
                             )
                         }
                     }
@@ -257,7 +268,7 @@ fun Home(viewModel: ImagesViewModel, navHostController: NavHostController) {
                         val apps = appDetails.value.data?.advertisements
                         if (!apps.isNullOrEmpty()) {
                             val app = apps.get(Random.nextInt(0, apps.size))
-                            AdBannerApp(app)
+                            MyAppNativeSmallAdComposable(app)
                         }
 
                     },

@@ -13,11 +13,12 @@ import com.example.wishes_jetpackcompose.Home
 import com.wishes.jetpackcompose.data.entities.Page
 import com.wishes.jetpackcompose.screens.Splash
 import com.wishes.jetpackcompose.screens.ViewPager
+import com.wishes.jetpackcompose.viewModel.AdsViewModel
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 
 
 @Composable
-fun NavigationHost(navController: NavHostController,viewModel: ImagesViewModel) {
+fun NavigationHost(navController: NavHostController,viewModel: ImagesViewModel,adsViewModel: AdsViewModel) {
 
     NavHost(
         navController = navController,
@@ -26,30 +27,30 @@ fun NavigationHost(navController: NavHostController,viewModel: ImagesViewModel) 
 
 
         composable(NavRoutes.Home.route) {
-            Home(viewModel, navController)
+            Home(viewModel,adsViewModel, navController)
         }
 
         composable(NavRoutes.Favorites.route) {
-            Favorites(viewModel, navController, PaddingValues())
+            Favorites(viewModel, adsViewModel = adsViewModel, navController, PaddingValues())
         }
         composable(NavRoutes.Categories.route) {
-            Categories(viewModel, navController, PaddingValues())
+            Categories(navHostController = navController, viewModel =viewModel , adsViewModel =adsViewModel , paddingValues = PaddingValues() )
         }
         composable(NavRoutes.Splash.route) {
-            Splash(navController,viewModel)
+            Splash(navController,viewModel,adsViewModel)
         }
 
         composable(NavRoutes.ByCat.route+"/{id}") {
             val id=it.arguments?.getString("id")
             id.let { id->
-                ByCat(viewModel,navController,id!!.toInt())
+                ByCat(viewModel, adsViewModel = adsViewModel,navController,id!!.toInt())
             }
 
         }
 
         composable(NavRoutes.ViewPager.route) {
-             navController.previousBackStackEntry?.savedStateHandle?.get<Page>("page").let {
-                ViewPager(viewModel,navController, it?.page, it?.imagesList,it?.cat)
+             navController.previousBackStackEntry?.savedStateHandle?.get<Int>("page").let {
+                ViewPager(viewModel,adsViewModel, it )
             }
         }
 

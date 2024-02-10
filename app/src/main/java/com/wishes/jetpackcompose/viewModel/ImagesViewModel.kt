@@ -8,12 +8,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.ads.nativead.NativeAd
 import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.data.entities.AppDetails
 import com.wishes.jetpackcompose.data.entities.Category
 import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.data.entities.Latest
 import com.wishes.jetpackcompose.repo.ImagesRepo
+import com.wishes.jetpackcompose.screens.GridItem
 import com.wishes.jetpackcompose.utlis.AdsUtil
 import com.wishes.jetpackcompose.utlis.Const.Companion.hasConnection
 import com.wishes.jetpackcompose.utlis.Resource
@@ -44,6 +46,8 @@ class ImagesViewModel @Inject constructor(
     private val _images = MutableStateFlow<Resource<Latest>>(Resource.Loading())
     val latest: StateFlow<Resource<Latest>> = _images.asStateFlow()
 
+    var showProgressLoadMore by mutableStateOf(false)
+
     var currentViewPagerType by mutableStateOf<VIEW_PAGER>(VIEW_PAGER.LATEST)
 
     private val _imagesByCategory = MutableStateFlow<Resource<Latest>>(Resource.Loading())
@@ -72,6 +76,7 @@ class ImagesViewModel @Inject constructor(
 
     val isImageFavorited = MutableStateFlow<Boolean>(false)
 
+
     fun getLatestImages() {
         viewModelScope.launch {
             val params = HashMap<String, Any>()
@@ -82,6 +87,7 @@ class ImagesViewModel @Inject constructor(
     }
 
     fun loadMore() {
+        showProgressLoadMore = true
         viewModelScope.launch {
             val offset = _images.value.data?.images?.size ?: 0
             val params = HashMap<String, Any>().apply {
@@ -98,10 +104,12 @@ class ImagesViewModel @Inject constructor(
                                 _images.value.data?.copy(images = allImages) ?: result.data
                             )
                         )
+                        showProgressLoadMore = false
                     }
 
                     is Resource.Error -> {
                         // Handle error case
+                        showProgressLoadMore = false
                     }
 
                     is Resource.Loading -> {
@@ -144,6 +152,8 @@ class ImagesViewModel @Inject constructor(
             _favorites.emit(Resource.Success(latest))
         }
     }
+
+
 
 
     fun addToFav(image: Image) {

@@ -2,10 +2,23 @@ package com.wishes.jetpackcompose.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,17 +30,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.wishes.jetpackcompose.admob.showInterstitialAfterClick
-import com.wishes.jetpackcompose.utlis.AppUtil
 import com.wishes.jetpackcompose.R
+import com.wishes.jetpackcompose.admob.showInterstitialAfterClick
+import com.wishes.jetpackcompose.data.entities.AppDetails
+import com.wishes.jetpackcompose.utlis.AppUtil
+import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 
 
 @Composable
-fun NavigationDrawer(onClick: () -> Unit) {
+fun NavigationDrawer(appDetails: AppDetails?, onClick: () -> Unit) {
     val context = LocalContext.current
     Box(
         modifier = Modifier
-            .fillMaxSize().background(MaterialTheme.colorScheme.onBackground),
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.onBackground),
     ) {
         Column() {
             Box(
@@ -54,7 +70,9 @@ fun NavigationDrawer(onClick: () -> Unit) {
                 showInterstitialAfterClick(context)
             }
             ItemDrawer(stringResource(R.string.our_app), Icons.Default.List) {
-                AppUtil.openStore("https://play.google.com/store/apps/developer?id=Istickers+Packs", context)
+                appDetails?.store?.let {
+                    AppUtil.openStore(appDetails.store, context)
+                }
                 showInterstitialAfterClick(context)
             }
             ItemDrawer(stringResource(R.string.feed), Icons.Default.Email) {
@@ -62,7 +80,9 @@ fun NavigationDrawer(onClick: () -> Unit) {
                 showInterstitialAfterClick(context)
             }
             ItemDrawer(stringResource(R.string.privacy), Icons.Default.Info) {
-                AppUtil.openStore("https://stickersapi.specialones.online", context)
+                appDetails?.privacyUrl?.let {
+                    AppUtil.openStore(appDetails.privacyUrl, context)
+                }
                 showInterstitialAfterClick(context)
             }
             Column(
@@ -76,9 +96,11 @@ fun NavigationDrawer(onClick: () -> Unit) {
                     Icons.Default.ArrowBack,
                     tint = MaterialTheme.colorScheme.onPrimary,
                     contentDescription = "",
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(40.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary).clickable {
+                        .background(MaterialTheme.colorScheme.primary)
+                        .clickable {
                             onClick()
                         }
                 )

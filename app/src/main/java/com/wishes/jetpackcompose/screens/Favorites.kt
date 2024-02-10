@@ -3,6 +3,7 @@ package com.example.wishes_jetpackcompose
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -13,6 +14,7 @@ import com.wishes.jetpackcompose.data.entities.Latest
 import com.wishes.jetpackcompose.runtime.NavRoutes
 import com.wishes.jetpackcompose.screens.Latest
 import com.wishes.jetpackcompose.utlis.Resource
+import com.wishes.jetpackcompose.viewModel.AdsViewModel
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -21,12 +23,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @Composable
 fun Favorites(
     viewModel: ImagesViewModel,
+    adsViewModel: AdsViewModel,
     navHostController: NavHostController,
     paddingValues: PaddingValues,
 ) {
 
     val context = LocalContext.current
-    val scrollState = rememberLazyGridState()
+    val scrollState = rememberLazyListState()
     val lazyGridState = LazyGridState
     val lifecycleOwner: LifecycleOwner
     val favorites = viewModel.favorites.collectAsState()
@@ -38,6 +41,7 @@ fun Favorites(
         scrollState = scrollState,
         paddingValues = paddingValues,
         latest = favorites.value,
+        adsViewModel = adsViewModel,
         loadMore = {}
     ) {
         viewModel.setImagesForViewPager(ImagesViewModel.VIEW_PAGER.FAVORITES)

@@ -20,6 +20,7 @@ data class AppDetails(
     val iconUrl: String?,
     val largePhotoUrl: String?,
     val privacyUrl: String?,
+    val store :String?,
     val ads: List<Ad>,
     val advertisements: List<App>,
     val advertisedBy: List<App>
