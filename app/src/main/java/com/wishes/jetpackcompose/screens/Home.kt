@@ -92,7 +92,7 @@ fun Home(viewModel: ImagesViewModel,adsViewModel: AdsViewModel, navHostControlle
     val scrollState = rememberLazyListState(0)
     val context = LocalContext.current
     val message = viewModel.message.collectAsState()
-    val latest = viewModel.latest.collectAsState(Resource.Loading())
+    val latest = viewModel.imagesWithAd.collectAsState(Resource.Loading())
     val appDetails = viewModel.appDetails.collectAsState()
 
     var isCategoriesSelected by remember {

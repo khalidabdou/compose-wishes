@@ -65,8 +65,7 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel,adsViewM
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             loadNativeAd(context, "ca-app-pub-3940256099942544/2247696110",) { ad ->
-                adsViewModel.addAd(ad)
-                //nativeAd = ad
+                viewModel.addAd(ad)
             }
         }
     }

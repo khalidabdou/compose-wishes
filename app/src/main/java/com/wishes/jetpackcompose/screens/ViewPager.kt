@@ -68,7 +68,7 @@ fun ViewPager(
 
         is Resource.Success -> {
             ViewPagerImages(
-                images = images.value.data!!.images,
+                images = images.value.data!!,
                 page = page,
                 apps = emptyList(),
                 context = context,
@@ -88,7 +88,7 @@ fun ViewPager(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ViewPagerImages(
-    images: List<Image>,
+    images: List<GridItem>,
     adsViewModel: AdsViewModel,
     page: Int?,
     apps: List<App>,
@@ -103,14 +103,14 @@ fun ViewPagerImages(
         val isFav = viewModel.isImageFavorited.collectAsState()
 
 
-        val mixedItems =
-            adsViewModel.injectAdsIntoImagesList(
-                images,
-                viewModel.appDetails.value.data?.advertisements ?: emptyList(),
-                4
-            )
-        LaunchedEffect(key1 = mixedItems[pagerState.currentPage]) {
-            val currentItem = mixedItems[pagerState.currentPage]
+//        val mixedItems =
+//            adsViewModel.injectAdsIntoImagesList(
+//                images,
+//                viewModel.appDetails.value.data?.advertisements ?: emptyList(),
+//                4
+//            )
+        LaunchedEffect(key1 = images[pagerState.currentPage]) {
+            val currentItem = images[pagerState.currentPage]
             // Assuming GridItem.Content represents your images
             if (currentItem is GridItem.Content) {
                 // Now you need to extract the image information from GridItem.Content
@@ -122,10 +122,10 @@ fun ViewPagerImages(
 
         HorizontalPager(
             modifier = Modifier.weight(9f),
-            count = mixedItems.size, // Use the size of mixedItems
+            count = images.size, // Use the size of mixedItems
             state = pagerState,
         ) { page ->
-            when (val item = mixedItems[page]) {
+            when (val item = images[page]) {
                 is GridItem.Ad -> {
                     // Correctly cast and pass the nativeAd from the item
                     Box(
@@ -182,7 +182,9 @@ fun ViewPagerImages(
                 stringResource(R.string.fav),
                 if (isFav.value) (Icons.Default.Favorite) else (Icons.Default.FavoriteBorder)
             ) {
-                addOrRemoveFromFav(images[pagerState.currentPage])
+                val currentItem = images[pagerState.currentPage]
+                if (currentItem is GridItem.Content)
+                addOrRemoveFromFav(currentItem.image)
                 showInterstitialAfterClick(context)
             }
 
@@ -191,7 +193,10 @@ fun ViewPagerImages(
                 Toast.makeText(context,"Download success",Toast.LENGTH_LONG).show()
             }*/
             Action(stringResource(R.string.share_icon), Icons.Outlined.Share) {
-                imagesBitmap[images[pagerState.currentPage].id]?.let {
+
+                val currentItem = images[pagerState.currentPage]
+                if (currentItem is GridItem.Content)
+                imagesBitmap[currentItem.image.id]?.let {
                     val uri: Uri? = getUriImage(it, context)
                     shareImageUri(uri!!, context)
                 }

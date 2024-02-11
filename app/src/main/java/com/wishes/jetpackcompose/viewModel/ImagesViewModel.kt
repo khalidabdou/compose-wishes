@@ -43,8 +43,15 @@ class ImagesViewModel @Inject constructor(
         // Add other types as necessary
     }
 
+
+    private val _ads = MutableStateFlow<List<NativeAd>>(emptyList())
+    val ads = _ads.asStateFlow()
+
     private val _images = MutableStateFlow<Resource<Latest>>(Resource.Loading())
-    val latest: StateFlow<Resource<Latest>> = _images.asStateFlow()
+    //val latest: StateFlow<Resource<Latest>> = _images.asStateFlow()
+
+    private val _imagesWithAd = MutableStateFlow<Resource<List<GridItem>>>(Resource.Loading())
+    val imagesWithAd: StateFlow<Resource<List<GridItem>>> = _imagesWithAd.asStateFlow()
 
     var showProgressLoadMore by mutableStateOf(false)
 
@@ -69,7 +76,7 @@ class ImagesViewModel @Inject constructor(
 
     //viewpager
     var currentPage by mutableStateOf<Int>(0)
-    var currentListImage = MutableStateFlow<Resource<Latest>>(Resource.Loading())
+    var currentListImage = MutableStateFlow<Resource<List<GridItem>>>(Resource.Loading())
 
     private val _message = MutableStateFlow<String>("Good Morning")
     val message: StateFlow<String> get() = _message
@@ -80,11 +87,33 @@ class ImagesViewModel @Inject constructor(
     fun getLatestImages() {
         viewModelScope.launch {
             val params = HashMap<String, Any>()
-            imageRepo.getImages(params).collect {
-                _images.emit(it)
+            imageRepo.getImages(params).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        val imagesList = result.data?.let { latest ->
+                            latest.images. map {
+                                GridItem.Content(it)
+                            }
+                        } ?: emptyList()
+
+                        // Emit the transformed list wrapped in `Resource.Success`
+                        _imagesWithAd.emit(Resource.Success(imagesList))
+                        updateListWithNewAdsAndEmit()
+
+                    }
+
+                    is Resource.Loading -> {
+                        _imagesWithAd.emit(Resource.Loading())
+                    }
+                    is Resource.Error -> {
+                        _imagesWithAd.emit(Resource.Error(result.message,null))
+                    }
+                    else ->{}
+                }
             }
         }
     }
+
 
     fun loadMore() {
         showProgressLoadMore = true
@@ -124,6 +153,58 @@ class ImagesViewModel @Inject constructor(
         }
     }
 
+    fun addAd(nativeAd: NativeAd) {
+        viewModelScope.launch {
+            val updatedList = _ads.value.toMutableList().apply {
+                add(nativeAd)
+            }
+            _ads.emit(updatedList)
+        }
+    }
+    fun updateListWithNewAdsAndEmit() {
+        viewModelScope.launch {
+            // Assuming _ads.value gives you the new ads to add
+            val newAdsList = _ads.value // You might need to prepare this list to match the desired ads to add
+
+            // Process the current _imagesWithAd value
+            val currentResource = _imagesWithAd.value
+            val updatedList = when (currentResource) {
+                is Resource.Success -> {
+                    val currentList = currentResource.data ?: emptyList()
+                    integrateAds(currentList, newAdsList)
+                }
+                else -> {
+                    // Handle other states (Loading, Error) as appropriate, possibly just returning the current list
+                    currentResource.data ?: emptyList()
+                }
+            }
+
+            // Emit the updated list
+            _imagesWithAd.emit(Resource.Success(updatedList))
+        }
+    }
+
+    private fun integrateAds(images: List<GridItem>, newAds: List<NativeAd>): List<GridItem> {
+        val resultList = mutableListOf<GridItem>()
+        var adIndex = 0
+
+        images.forEachIndexed { index, item ->
+            resultList.add(item)
+
+            // After every 4 images, try to add a new ad if available
+            if ((index + 1) % 4 == 0 && adIndex < newAds.size) {
+                resultList.add(GridItem.Ad(newAds[adIndex]))
+                adIndex++
+            }
+        }
+
+        // If there are still ads left after the integration, you might decide to append them at the end
+        // or handle them according to your needs.
+
+        return resultList
+    }
+
+
 
     fun getImageByCategory(categoryId: Int) {
         viewModelScope.launch {
@@ -154,8 +235,6 @@ class ImagesViewModel @Inject constructor(
     }
 
 
-
-
     fun addToFav(image: Image) {
         viewModelScope.launch {
             isImageFavorited.emit(!isImageFavorited.value)
@@ -177,27 +256,22 @@ class ImagesViewModel @Inject constructor(
 
     fun setImagesForViewPager(type: VIEW_PAGER) {
         currentViewPagerType = type
-        when (type) {
-            VIEW_PAGER.LATEST -> {
-                viewModelScope.launch {
-                    currentListImage.emit(_images.value)
+        viewModelScope.launch {
+            when (type) {
+                VIEW_PAGER.LATEST -> {
+                    transformAndEmit(_images.value)
+                }
+                VIEW_PAGER.FAVORITES -> {
+                    transformAndEmit(_favorites.value)
+                }
+                VIEW_PAGER.BY_CATEGORY -> {
+                    // Assuming _imagesByCategory is defined and follows a similar structure to _favorites
+                    transformAndEmit(_imagesByCategory.value)
                 }
             }
-
-            VIEW_PAGER.FAVORITES -> {
-                viewModelScope.launch {
-                    currentListImage.emit(_favorites.value)
-                }
-            }
-
-            VIEW_PAGER.BY_CATEGORY -> {
-                viewModelScope.launch {
-                    currentListImage.emit(_imagesByCategory.value)
-                }
-            }
-
         }
     }
+
 
     //suspend fun isFav(): Boolean = imageRepo.isImageInFav(currentListImage!!.get(currentPage!!))
 
@@ -241,6 +315,28 @@ class ImagesViewModel @Inject constructor(
 
 
     }
+
+    private fun transformAndEmit(resource: Resource<Latest>?) {
+        val transformed = when (resource) {
+            is Resource.Success -> {
+                // Explicitly create a Resource<List<GridItem>> from Resource<Latest>
+                Resource.Success(resource.data?.let { latest ->
+                    // Assuming `latest` is a list that can be directly mapped to a list of GridItem instances
+                    // Map each item in `latest` to a GridItem.Content (or other GridItem types as needed)
+                    latest.images.map { item -> GridItem.Content(item) as GridItem } // Cast to GridItem to ensure correct type
+                } ?: emptyList())
+            }
+            is Resource.Loading -> Resource.Loading()
+            is Resource.Error -> Resource.Error(resource.message,null)
+            is Resource.Idle -> Resource.Idle()
+            else -> Resource.Error("Unsupported resource type",null)
+        }
+        viewModelScope.launch {
+            currentListImage.emit(transformed)
+        }
+
+    }
+
 
 
     fun hasInternetConnection(): Boolean = hasConnection(getApplication())

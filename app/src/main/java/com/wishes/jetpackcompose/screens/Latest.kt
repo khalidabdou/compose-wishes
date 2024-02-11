@@ -44,7 +44,7 @@ import com.wishes.jetpackcompose.viewModel.AdsViewModel
 fun Latest(
     scrollState: LazyListState,
     paddingValues: PaddingValues,
-    latest: Resource<Latest>,
+    latest: Resource<List<GridItem>>,
     apps: List<App> = emptyList(),
     showLoadMore: Boolean? = false,
     loadMore: () -> Unit,
@@ -55,27 +55,11 @@ fun Latest(
     when (latest) {
         is Resource.Success -> {
             latest.data?.let { imagesdata ->
-                imagesdata.images.let { imageSize ->
-                    if (imageSize.isNullOrEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            EmptyState()
-                        }
-                    } else {
-                        val imagesUrls = latest!!.data!!.images!!
-                        val mixedItems =
-                            adsViewModel.injectAdsIntoImagesList(imagesUrls, apps, 4)
-
-                        ImageGridWithAds(mixedItems, paddingValues, loadMore = {
-                            loadMore()
-                        }) {
-                            Log.d("click", "$it")
-                            onClick(it)
-                        }
-                    }
+                ImageGridWithAds(imagesdata, paddingValues, loadMore = {
+                    loadMore()
+                }) {
+                    Log.d("click", "$it")
+                    onClick(it)
                 }
             }
         }

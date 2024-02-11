@@ -34,7 +34,6 @@ import androidx.navigation.NavHostController
 import com.google.android.gms.ads.nativead.NativeAd
 import com.wishes.jetpackcompose.data.entities.Category
 import com.wishes.jetpackcompose.runtime.NavRoutes
-import com.wishes.jetpackcompose.screens.comp.Ads.NativeAdComposable
 import com.wishes.jetpackcompose.screens.comp.Ads.NativeSmallAdComposable
 import com.wishes.jetpackcompose.screens.comp.LoadingShimmerEffect
 import com.wishes.jetpackcompose.utlis.Const
@@ -70,9 +69,9 @@ fun Categories(
 
     when (categories.value) {
         is Resource.Success -> {
-            val mixedItems =
-                categories.value.data?.let { adsViewModel.injectAdsIntoCategoryList(it, 2) }
-            CategoryListWithAds(mixedItems!!,paddingValues,navHostController)
+            //val mixedItems =
+               // categories.value.data?.let { adsViewModel.injectAdsIntoCategoryList(it, 2) }
+            //CategoryListWithAds(mixedItems!!,paddingValues,navHostController)
         }
 
         is Resource.Loading -> {

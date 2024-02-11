@@ -30,17 +30,17 @@ fun ByCat(
         viewModel.getImageByCategory(catId)
     }
 
-    Latest(
-        scrollState = scrollState,
-        paddingValues = PaddingValues(),
-        latest = images.value,
-        adsViewModel = adsViewModel,
-        loadMore = {}) {
-        viewModel.setImagesForViewPager(ImagesViewModel.VIEW_PAGER.BY_CATEGORY)
-        navHostController.currentBackStackEntry?.savedStateHandle?.set(
-            key = "page",
-            value = it
-        )
-        navHostController.navigate(NavRoutes.ViewPager.route)
-    }
+//    Latest(
+//        scrollState = scrollState,
+//        paddingValues = PaddingValues(),
+//        latest = images.value,
+//        adsViewModel = adsViewModel,
+//        loadMore = {}) {
+//        viewModel.setImagesForViewPager(ImagesViewModel.VIEW_PAGER.BY_CATEGORY)
+//        navHostController.currentBackStackEntry?.savedStateHandle?.set(
+//            key = "page",
+//            value = it
+//        )
+//        navHostController.navigate(NavRoutes.ViewPager.route)
+//    }
 }

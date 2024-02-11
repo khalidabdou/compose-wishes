@@ -37,19 +37,19 @@ fun Favorites(
     LaunchedEffect(Unit) {
         viewModel.getFavoritesRoom()
     }
-    Latest(
-        scrollState = scrollState,
-        paddingValues = paddingValues,
-        latest = favorites.value,
-        adsViewModel = adsViewModel,
-        loadMore = {}
-    ) {
-        viewModel.setImagesForViewPager(ImagesViewModel.VIEW_PAGER.FAVORITES)
-        navHostController.currentBackStackEntry?.savedStateHandle?.set(
-            key = "page",
-            value = it
-        )
-        navHostController.navigate(NavRoutes.ViewPager.route)
-
-    }
+//    Latest(
+//        scrollState = scrollState,
+//        paddingValues = paddingValues,
+//        latest = favorites.value,
+//        adsViewModel = adsViewModel,
+//        loadMore = {}
+//    ) {
+//        viewModel.setImagesForViewPager(ImagesViewModel.VIEW_PAGER.FAVORITES)
+//        navHostController.currentBackStackEntry?.savedStateHandle?.set(
+//            key = "page",
+//            value = it
+//        )
+//        navHostController.navigate(NavRoutes.ViewPager.route)
+//
+//    }
 }
