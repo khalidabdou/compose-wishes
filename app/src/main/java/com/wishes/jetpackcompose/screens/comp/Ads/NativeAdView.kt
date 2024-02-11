@@ -3,14 +3,11 @@ package com.wishes.jetpackcompose.screens.comp.Ads
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,7 +37,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
@@ -48,8 +44,6 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
-import com.wishes.jetpackcompose.R
-import com.wishes.jetpackcompose.data.entities.Ad
 import com.wishes.jetpackcompose.data.entities.App
 import com.wishes.jetpackcompose.utlis.AppUtil
 import kotlinx.coroutines.delay
@@ -73,20 +67,27 @@ fun loadNativeAd(context: Context, adUnitId: String, onAdLoaded: (NativeAd) -> U
                 super.onAdLoaded()
             }
         })
-        .withNativeAdOptions(NativeAdOptions.Builder()
-            .setRequestCustomMuteThisAd(true)
-            .build())
+        .withNativeAdOptions(
+            NativeAdOptions.Builder()
+                .setRequestCustomMuteThisAd(true)
+                .build()
+        )
         .build()
 
 
-    adLoader.loadAds(AdRequest.Builder().build(),5)
+    adLoader.loadAds(AdRequest.Builder().build(), 5)
 }
 
 @Composable
-fun NativeAdComposable(nativeAd: NativeAd,onCTAClicked: () -> Unit) {
+fun NativeAdComposable(nativeAd: NativeAd, onCTAClicked: () -> Unit) {
     val context = LocalContext.current
     val cta = nativeAd.callToAction
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+            .clip(RoundedCornerShape(12.dp))
+    ) {
 
         Column(
             modifier = Modifier
@@ -195,11 +196,17 @@ fun NativeAdComposable(nativeAd: NativeAd,onCTAClicked: () -> Unit) {
     }
 
 }
+
 @Composable
-fun NativeSmallAdComposable(nativeAd: NativeAd,onCTAClicked: () -> Unit) {
+fun NativeSmallAdComposable(nativeAd: NativeAd, onCTAClicked: () -> Unit) {
     val context = LocalContext.current
     val cta = nativeAd.callToAction
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+            .clip(RoundedCornerShape(12.dp))
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -302,10 +309,15 @@ fun NativeSmallAdComposable(nativeAd: NativeAd,onCTAClicked: () -> Unit) {
 }
 
 @Composable
-fun MyAppNativeSmallAdComposable(app:App) {
+fun MyAppNativeSmallAdComposable(app: App) {
     val context = LocalContext.current
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+            .clip(RoundedCornerShape(12.dp))
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -370,7 +382,7 @@ fun MyAppNativeSmallAdComposable(app:App) {
             Button(
                 onClick = {
                     try {
-                        AppUtil.openUrl(context,app.appUrl!!)
+                        AppUtil.openUrl(context, app.appUrl!!)
                     } catch (e: Exception) {
                         Log.e("AdLoader", "Error performing click: ${e.message}")
                     }
@@ -386,6 +398,7 @@ fun MyAppNativeSmallAdComposable(app:App) {
     }
 
 }
+
 @Composable
 fun AutoSlidingImageCarousel(
     images: List<NativeAd.Image>,

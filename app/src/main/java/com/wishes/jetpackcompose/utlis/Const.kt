@@ -15,8 +15,9 @@ class Const {
         const val TABLE_IMAGE = "tbl_images"
         const val TABLE_CATEGORY = "tbl_category"
         const val TABLE_WALLPAPER = "tbl_wallpaper"
+        const val BASE_URL = "http://192.168.8.102:2024"
         //const val BASE_URL = "http://192.168.8.101:2024"
-        const val BASE_URL = "http://192.168.8.101:2024"
+
         //192.168.100.205
         //192.168.43.214
 

@@ -28,7 +28,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -37,16 +36,15 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.google.android.gms.ads.nativead.NativeAd
 import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.admob.showInterstitialAfterClick
 import com.wishes.jetpackcompose.data.entities.App
 import com.wishes.jetpackcompose.data.entities.Image
+import com.wishes.jetpackcompose.screens.comp.Ads.MyAppNativeSmallAdComposable
 import com.wishes.jetpackcompose.screens.comp.Ads.NativeAdComposable
 import com.wishes.jetpackcompose.utlis.AppUtil.getUriImage
 import com.wishes.jetpackcompose.utlis.AppUtil.imagesBitmap
 import com.wishes.jetpackcompose.utlis.AppUtil.shareImageUri
-import com.wishes.jetpackcompose.utlis.Const.Companion.BASE_URL
 import com.wishes.jetpackcompose.utlis.DEFAULT_RECIPE_IMAGE
 import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.utlis.loadPicture
@@ -104,13 +102,24 @@ fun ViewPagerImages(
         val scope = rememberCoroutineScope()
         val isFav = viewModel.isImageFavorited.collectAsState()
 
-        LaunchedEffect(key1 = images[pagerState.currentPage], block = {
-            viewModel.checkIfImageFavorited(images[pagerState.currentPage])
-            Log.d("fav", isFav.value.toString())
-        })
 
         val mixedItems =
-            adsViewModel.injectAdsIntoImagesList(images.mapNotNull { it.url }, 4)
+            adsViewModel.injectAdsIntoImagesList(
+                images,
+                viewModel.appDetails.value.data?.advertisements ?: emptyList(),
+                4
+            )
+        LaunchedEffect(key1 = mixedItems[pagerState.currentPage]) {
+            val currentItem = mixedItems[pagerState.currentPage]
+            // Assuming GridItem.Content represents your images
+            if (currentItem is GridItem.Content) {
+                // Now you need to extract the image information from GridItem.Content
+                // and check if it's favorited
+                viewModel.checkIfImageFavorited(currentItem.image) // Assuming you have a URL or similar identifier
+            }
+        }
+
+
         HorizontalPager(
             modifier = Modifier.weight(9f),
             count = mixedItems.size, // Use the size of mixedItems
@@ -119,18 +128,29 @@ fun ViewPagerImages(
             when (val item = mixedItems[page]) {
                 is GridItem.Ad -> {
                     // Correctly cast and pass the nativeAd from the item
-                    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.onPrimary),
+                        contentAlignment = Alignment.Center
+                    ) {
                         NativeAdComposable(nativeAd = item.nativeAd) {
                             // Additional handling for ad if necessary
                         }
                     }
 
                 }
+
+                is GridItem.App -> {
+                    MyAppNativeSmallAdComposable(item.app)
+
+                }
+
                 is GridItem.Content -> {
                     currentPage = page
                     // Use item.imageUrl which is already a complete URL from your mixedItems list
                     val image = loadPicture(
-                        url = item.imageUrl, // Directly use imageUrl from Content
+                        url = item.image.url!!,
                         defaultImage = DEFAULT_RECIPE_IMAGE
                     ).value
                     Box(modifier = Modifier.fillMaxSize()) {

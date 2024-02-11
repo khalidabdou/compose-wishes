@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,8 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import com.google.android.gms.ads.nativead.NativeAd
+import com.wishes.jetpackcompose.data.entities.App
+import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.data.entities.Latest
-import com.wishes.jetpackcompose.data.entities.Page
+import com.wishes.jetpackcompose.screens.comp.Ads.MyAppNativeSmallAdComposable
 import com.wishes.jetpackcompose.screens.comp.Ads.NativeAdComposable
 import com.wishes.jetpackcompose.screens.comp.EmptyState
 import com.wishes.jetpackcompose.screens.comp.ImageItem
@@ -44,6 +45,7 @@ fun Latest(
     scrollState: LazyListState,
     paddingValues: PaddingValues,
     latest: Resource<Latest>,
+    apps: List<App> = emptyList(),
     showLoadMore: Boolean? = false,
     loadMore: () -> Unit,
     adsViewModel: AdsViewModel,
@@ -63,14 +65,14 @@ fun Latest(
                             EmptyState()
                         }
                     } else {
-                        val imagesUrls = latest!!.data!!.images!!.mapNotNull { it.url }
+                        val imagesUrls = latest!!.data!!.images!!
                         val mixedItems =
-                            adsViewModel.injectAdsIntoImagesList(imagesUrls, 4)
+                            adsViewModel.injectAdsIntoImagesList(imagesUrls, apps, 4)
 
                         ImageGridWithAds(mixedItems, paddingValues, loadMore = {
                             loadMore()
                         }) {
-                            Log.d("click","$it")
+                            Log.d("click", "$it")
                             onClick(it)
                         }
                     }
@@ -174,7 +176,7 @@ fun ImageGridWithAds(
                         when (gridItem) {
                             is GridItem.Content -> {
                                 val image: MutableState<Bitmap?>? = loadPicturetemmp(
-                                    url = Const.BASE_URL + gridItem.imageUrl,
+                                    url = Const.BASE_URL + gridItem.image.url,
                                     defaultImage = DEFAULT_RECIPE_IMAGE
                                 )
                                 Box(modifier = Modifier.weight(1f)) {
@@ -183,6 +185,10 @@ fun ImageGridWithAds(
                                         onClick(actualIndex)
                                     })
                                 }
+                            }
+
+                            is GridItem.App -> {
+                                MyAppNativeSmallAdComposable(gridItem.app)
                             }
 
                             is GridItem.Ad -> {
@@ -206,7 +212,8 @@ fun ImageGridWithAds(
 
 
 sealed class GridItem {
-    data class Content(val imageUrl: String) : GridItem()
+    data class Content(val image: Image) : GridItem()
+    data class App(val app: com.wishes.jetpackcompose.data.entities.App) : GridItem()
     data class Ad(val nativeAd: NativeAd) : GridItem()
 }
 
