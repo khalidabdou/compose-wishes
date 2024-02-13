@@ -3,7 +3,6 @@ package com.wishes.jetpackcompose.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -38,10 +37,10 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.admob.showInterstitialAfterClick
-import com.wishes.jetpackcompose.data.entities.App
 import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.screens.comp.Ads.MyAppNativeSmallAdComposable
 import com.wishes.jetpackcompose.screens.comp.Ads.NativeAdComposable
+import com.wishes.jetpackcompose.screens.comp.EmptyState
 import com.wishes.jetpackcompose.utlis.AppUtil.getUriImage
 import com.wishes.jetpackcompose.utlis.AppUtil.imagesBitmap
 import com.wishes.jetpackcompose.utlis.AppUtil.shareImageUri
@@ -68,12 +67,9 @@ fun ViewPager(
 
         is Resource.Success -> {
             ViewPagerImages(
-                images = images.value.data!!,
                 page = page,
-                apps = emptyList(),
                 context = context,
                 viewModel = viewModel,
-                adsViewModel = adsViewModel
             ) {
                 viewModel.addToFav(it)
             }
@@ -88,14 +84,13 @@ fun ViewPager(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ViewPagerImages(
-    images: List<GridItem>,
-    adsViewModel: AdsViewModel,
     page: Int?,
-    apps: List<App>,
     context: Context,
     viewModel: ImagesViewModel,
     addOrRemoveFromFav: (Image) -> Unit
 ) {
+
+    val images = viewModel.currentListImage.collectAsState(Resource.Loading()).value.data
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         var currentPage = page ?: 0
         val pagerState = rememberPagerState(currentPage)
@@ -109,8 +104,8 @@ fun ViewPagerImages(
 //                viewModel.appDetails.value.data?.advertisements ?: emptyList(),
 //                4
 //            )
-        LaunchedEffect(key1 = images[pagerState.currentPage]) {
-            val currentItem = images[pagerState.currentPage]
+        LaunchedEffect(key1 = images?.get(pagerState.currentPage)) {
+            val currentItem = images?.get(pagerState.currentPage)
             // Assuming GridItem.Content represents your images
             if (currentItem is GridItem.Content) {
                 // Now you need to extract the image information from GridItem.Content
@@ -120,89 +115,92 @@ fun ViewPagerImages(
         }
 
 
-        HorizontalPager(
-            modifier = Modifier.weight(9f),
-            count = images.size, // Use the size of mixedItems
-            state = pagerState,
-        ) { page ->
-            when (val item = images[page]) {
-                is GridItem.Ad -> {
-                    // Correctly cast and pass the nativeAd from the item
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.onPrimary),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        NativeAdComposable(nativeAd = item.nativeAd) {
-                            // Additional handling for ad if necessary
+        if (!images.isNullOrEmpty()) {
+            HorizontalPager(
+                modifier = Modifier.weight(9f),
+                count = images.size, // Use the size of mixedItems
+                state = pagerState,
+            ) { page ->
+                when (val item = images[page]) {
+                    is GridItem.Ad -> {
+                        // Correctly cast and pass the nativeAd from the item
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.onPrimary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            NativeAdComposable(nativeAd = item.nativeAd) {
+                                // Additional handling for ad if necessary
+                            }
                         }
+
                     }
 
-                }
+                    is GridItem.App -> {
+                        MyAppNativeSmallAdComposable(item.app)
 
-                is GridItem.App -> {
-                    MyAppNativeSmallAdComposable(item.app)
+                    }
 
-                }
-
-                is GridItem.Content -> {
-                    currentPage = page
-                    // Use item.imageUrl which is already a complete URL from your mixedItems list
-                    val image = loadPicture(
-                        url = item.image.url!!,
-                        defaultImage = DEFAULT_RECIPE_IMAGE
-                    ).value
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        image?.let { img ->
-                            Image(
-                                bitmap = img.asImageBitmap(), contentDescription = null,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                            // Assuming imagesBitmap is a way to cache or keep track of loaded images
-                            // images[page].id might not directly correspond here due to ads adjustment
-                            // You might need a mapping or a way to retrieve the correct image ID if necessary
+                    is GridItem.Content -> {
+                        currentPage = page
+                        // Use item.imageUrl which is already a complete URL from your mixedItems list
+                        val image = loadPicture(
+                            url = item.image.url!!,
+                            defaultImage = DEFAULT_RECIPE_IMAGE
+                        ).value
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            image?.let { img ->
+                                Image(
+                                    bitmap = img.asImageBitmap(), contentDescription = null,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                                // Assuming imagesBitmap is a way to cache or keep track of loaded images
+                                // images[page].id might not directly correspond here due to ads adjustment
+                                // You might need a mapping or a way to retrieve the correct image ID if necessary
+                            }
                         }
                     }
                 }
             }
-        }
 
 
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(6.dp)
-        ) {
 
-            Action(
-                stringResource(R.string.fav),
-                if (isFav.value) (Icons.Default.Favorite) else (Icons.Default.FavoriteBorder)
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(6.dp)
             ) {
-                val currentItem = images[pagerState.currentPage]
-                if (currentItem is GridItem.Content)
-                addOrRemoveFromFav(currentItem.image)
-                showInterstitialAfterClick(context)
-            }
 
-
-            /*Action("Download", Icons.Outlined.KeyboardArrowDown) {
-                Toast.makeText(context,"Download success",Toast.LENGTH_LONG).show()
-            }*/
-            Action(stringResource(R.string.share_icon), Icons.Outlined.Share) {
-
-                val currentItem = images[pagerState.currentPage]
-                if (currentItem is GridItem.Content)
-                imagesBitmap[currentItem.image.id]?.let {
-                    val uri: Uri? = getUriImage(it, context)
-                    shareImageUri(uri!!, context)
+                Action(
+                    stringResource(R.string.fav),
+                    if (isFav.value) (Icons.Default.Favorite) else (Icons.Default.FavoriteBorder)
+                ) {
+                    val currentItem = images[pagerState.currentPage]
+                    if (currentItem is GridItem.Content)
+                        addOrRemoveFromFav(currentItem.image)
+                    showInterstitialAfterClick(context)
                 }
-                showInterstitialAfterClick(context)
+
+
+                /*Action("Download", Icons.Outlined.KeyboardArrowDown) {
+                    Toast.makeText(context,"Download success",Toast.LENGTH_LONG).show()
+                }*/
+                Action(stringResource(R.string.share_icon), Icons.Outlined.Share) {
+
+                    val currentItem = images[pagerState.currentPage]
+                    if (currentItem is GridItem.Content)
+                        imagesBitmap[currentItem.image.id]?.let {
+                            val uri: Uri? = getUriImage(it, context)
+                            shareImageUri(uri!!, context)
+                        }
+                    showInterstitialAfterClick(context)
+                }
             }
-        }
+        } else EmptyState()
 
     }
 }

@@ -213,12 +213,8 @@ fun Home(viewModel: ImagesViewModel,adsViewModel: AdsViewModel, navHostControlle
                     when (page) {
                         0 -> {
                             Latest(
-                                scrollState = scrollState,
                                 paddingValues = it,
                                 latest = latest.value,
-                                showLoadMore = viewModel.showProgressLoadMore,
-                                apps = viewModel.appDetails.value.data?.advertisements ?: emptyList(),
-                                adsViewModel = adsViewModel,
                                 loadMore = {
                                     viewModel.loadMore()
                                 }

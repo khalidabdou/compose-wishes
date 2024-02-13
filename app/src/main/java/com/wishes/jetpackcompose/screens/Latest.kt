@@ -42,15 +42,12 @@ import com.wishes.jetpackcompose.viewModel.AdsViewModel
 
 @Composable
 fun Latest(
-    scrollState: LazyListState,
     paddingValues: PaddingValues,
     latest: Resource<List<GridItem>>,
-    apps: List<App> = emptyList(),
-    adsViewModel: AdsViewModel,
-    showLoadMore: Boolean? = false,
     loadMore: () -> Unit,
     onClick: (Int) -> Unit
 ) {
+
 
     when (latest) {
         is Resource.Success -> {
