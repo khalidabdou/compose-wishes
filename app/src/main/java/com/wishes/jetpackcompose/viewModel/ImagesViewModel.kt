@@ -3,6 +3,7 @@ package com.wishes.jetpackcompose.viewModel
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -159,6 +160,10 @@ class ImagesViewModel @Inject constructor(
                 add(nativeAd)
             }
             _ads.emit(updatedList)
+            if (_ads.value.size>=4){
+                updateListWithNewAdsAndEmit()
+            }
+
         }
     }
     fun updateListWithNewAdsAndEmit() {
@@ -184,25 +189,31 @@ class ImagesViewModel @Inject constructor(
         }
     }
 
-    private fun integrateAds(images: List<GridItem>, newAds: List<NativeAd>): List<GridItem> {
+    fun integrateAds(images: List<GridItem>, newAds: List<NativeAd>): List<GridItem> {
         val resultList = mutableListOf<GridItem>()
         var adIndex = 0
+
+        // Collect existing ads' identifiers to avoid duplicates
+        val existingAdIds = images.filterIsInstance<GridItem.Ad>().mapNotNull { it.nativeAd }
 
         images.forEachIndexed { index, item ->
             resultList.add(item)
 
-            // After every 4 images, try to add a new ad if available
+            // After every 4 images, try to add a new ad if available and not already present
             if ((index + 1) % 4 == 0 && adIndex < newAds.size) {
-                resultList.add(GridItem.Ad(newAds[adIndex]))
-                adIndex++
+                val newAd = newAds[adIndex]
+                Log.d("adloader","adloader ${adIndex}")
+                // Assuming NativeAd has an 'id' property for this example
+                if (!existingAdIds.contains(newAd)) {
+                    resultList.add(GridItem.Ad(newAd))
+                    Log.d("adloader","adloader $adIndex")
+                    adIndex++
+                }
             }
         }
-
-        // If there are still ads left after the integration, you might decide to append them at the end
-        // or handle them according to your needs.
-
         return resultList
     }
+
 
 
 

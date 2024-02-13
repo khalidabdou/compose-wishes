@@ -46,9 +46,9 @@ fun Latest(
     paddingValues: PaddingValues,
     latest: Resource<List<GridItem>>,
     apps: List<App> = emptyList(),
+    adsViewModel: AdsViewModel,
     showLoadMore: Boolean? = false,
     loadMore: () -> Unit,
-    adsViewModel: AdsViewModel,
     onClick: (Int) -> Unit
 ) {
 

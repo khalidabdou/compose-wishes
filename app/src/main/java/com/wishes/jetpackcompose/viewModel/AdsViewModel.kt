@@ -22,10 +22,4 @@ import javax.inject.Inject
 class AdsViewModel @Inject constructor(application: Application) : AndroidViewModel(application) {
 
 
-
-    // Function to add a single ad to the list
-
-
-
-
 }
