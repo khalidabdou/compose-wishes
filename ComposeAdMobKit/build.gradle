@@ -57,4 +57,12 @@ publishing {
             }
         }
     }
+
+    repositories {
+        maven {
+            url "https://jitpack.io"
+            credentials { username "jp_gk8ops16q1m0jjppnhea9sl9o7" }
+        }
+    }
+
 }
