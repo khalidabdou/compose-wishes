@@ -17,7 +17,7 @@ android {
     defaultConfig {
         //applicationId "com.wishes2.wishes.thailands"
         applicationId "com.wishes2.wishes.thailands"
-        minSdk 23
+        minSdk 24
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -39,7 +39,7 @@ android {
         it.buildConfigField 'String', 'api', API
         it.buildConfigField 'String', 'PACKAGE_NAME', PACKAGE_NAME
     }
-    
+
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -128,13 +128,13 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
 
 
-
     def glide = "4.11.0"
     implementation "com.github.bumptech.glide:glide:$glide"
     kapt "com.github.bumptech.glide:compiler:$glide"
     implementation "io.coil-kt:coil-compose:2.4.0" // Check for the latest version
 
-    implementation 'androidx.compose.material:material-icons-extended:1.6.1' // Check for the latest version
+    implementation 'androidx.compose.material:material-icons-extended:1.6.1'
+    // Check for the latest version
 
 
     implementation platform('com.google.firebase:firebase-bom:31.0.2')
@@ -147,5 +147,8 @@ dependencies {
     implementation 'com.facebook.android:audience-network-sdk:6.12.0'
     implementation("com.applovin:applovin-sdk:11.4.4")
     implementation 'com.applovin.mediation:facebook-adapter:6.11.0.5'
+
+
+    implementation project(':ComposeAdMobKit')
 
 }

@@ -20,6 +20,7 @@ import com.wishes.jetpackcompose.screens.GridItem
 import com.wishes.jetpackcompose.utlis.AdsUtil
 import com.wishes.jetpackcompose.utlis.Const.Companion.hasConnection
 import com.wishes.jetpackcompose.utlis.Resource
+import com.wishes.jetpackcompose.utlis.integrateAds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +42,6 @@ class ImagesViewModel @Inject constructor(
         LATEST,
         FAVORITES,
         BY_CATEGORY
-        // Add other types as necessary
     }
 
 
@@ -99,7 +99,7 @@ class ImagesViewModel @Inject constructor(
 
                         // Emit the transformed list wrapped in `Resource.Success`
                         _imagesWithAd.emit(Resource.Success(imagesList))
-                        updateListWithNewAdsAndEmit()
+                        updateListWithAdsAndEmit(_imagesWithAd, _ads.value)
                     }
 
                     is Resource.Loading -> {
@@ -171,9 +171,7 @@ class ImagesViewModel @Inject constructor(
     fun updateListWithNewAdsAndEmit() {
         viewModelScope.launch {
             // Assuming _ads.value gives you the new ads to add
-            val newAdsList =
-                _ads.value // You might need to prepare this list to match the desired ads to add
-            // Process the current _imagesWithAd value
+            val newAdsList = _ads.value
             val currentResource = _imagesWithAd.value
             val updatedList = when (currentResource) {
                 is Resource.Success -> {
@@ -186,8 +184,25 @@ class ImagesViewModel @Inject constructor(
                     currentResource.data ?: emptyList()
                 }
             }
-
             _imagesWithAd.emit(Resource.Success(updatedList))
+        }
+    }
+
+    private fun updateListWithAdsAndEmit(
+        targetFlow: MutableStateFlow<Resource<List<GridItem>>>,
+        newAds: List<NativeAd>
+    ) {
+        viewModelScope.launch {
+            val currentResource = targetFlow.value
+            val updatedList = when (currentResource) {
+                is Resource.Success -> {
+                    val currentList = currentResource.data ?: emptyList()
+                    currentList.integrateAds(newAds)
+                }
+
+                else -> currentResource.data ?: emptyList()
+            }
+            targetFlow.emit(Resource.Success(updatedList))
         }
     }
 
@@ -265,6 +280,8 @@ class ImagesViewModel @Inject constructor(
             } ?: emptyList()
 
             _favorites.emit(Resource.Success(gridItems))
+            updateListWithAdsAndEmit(_favorites, _ads.value)
+
         }
     }
 
@@ -350,8 +367,6 @@ class ImagesViewModel @Inject constructor(
 
 
     }
-
-
 
 
     fun hasInternetConnection(): Boolean = hasConnection(getApplication())

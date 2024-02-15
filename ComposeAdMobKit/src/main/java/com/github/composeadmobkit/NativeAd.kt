@@ -1,4 +1,4 @@
-package com.wishes.jetpackcompose.screens.comp.Ads
+package com.github.composeadmobkit
 
 import android.content.Context
 import android.os.Bundle
@@ -44,8 +44,6 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
-import com.wishes.jetpackcompose.data.entities.App
-import com.wishes.jetpackcompose.utlis.AppUtil
 import kotlinx.coroutines.delay
 
 
@@ -78,124 +76,123 @@ fun loadNativeAd(context: Context, adUnitId: String, onAdLoaded: (NativeAd) -> U
     adLoader.loadAds(AdRequest.Builder().build(), 5)
 }
 
-//@Composable
-//fun NativeAdComposable(nativeAd: NativeAd, onCTAClicked: () -> Unit) {
-//    val context = LocalContext.current
-//    val cta = nativeAd.callToAction
-//    Box(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(4.dp)
-//            .clip(RoundedCornerShape(12.dp))
-//    ) {
-//
-//        Column(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .background(MaterialTheme.colorScheme.onPrimary)
-//
-//        ) {
-//            nativeAd.adChoicesInfo?.let { adChoicesInfo ->
-//                Row(
-//                    modifier = Modifier
-//                        .padding(8.dp)
-//
-//                        .clickable {
-//                            // Handle click on AdChoices info, possibly opening a browser to more info
-//                        }
-//                ) {
-//                    adChoicesInfo.images.forEach { image ->
-//                        AsyncImage(
-//                            model = image.drawable,
-//                            contentDescription = "AdChoices Icon",
-//                            modifier = Modifier.size(24.dp)
-//                        )
-//                    }
-//                    Text(
-//                        text = adChoicesInfo.text.toString(),
-//                        color = Color.Magenta,
-//                        style = MaterialTheme.typography.bodySmall,
-//                        modifier = Modifier.padding(start = 4.dp)
-//                    )
-//                }
-//            }
-//
-//            nativeAd.images?.let { images ->
-//                AutoSlidingImageCarousel(
-//                    images = images,
-//                    modifier = Modifier.fillMaxWidth() // Specify the desired height
-//                )
-//            }
-//            Row {
-//                nativeAd.icon?.let { icon ->
-//                    AsyncImage(
-//                        model = icon.drawable,
-//                        contentDescription = "Ad Icon",
-//                        modifier = Modifier
-//                            .size(48.dp)
-//                            .clip(RoundedCornerShape(12.dp))
-//                            .padding(4.dp)
-//                    )
-//                }
-//
-//                Column(modifier = Modifier.fillMaxWidth()) {
-//                    // Ad headline
-//                    Text(
-//                        text = nativeAd.headline ?: "",
-//                        modifier = Modifier
-//                            .align(Alignment.Start)
-//                            .padding(8.dp),
-//                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
-//                    )
-//                    Row {
-//                        Text(
-//                            text = "Ad",
-//                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-//                            color = MaterialTheme.colorScheme.onPrimary,
-//                            modifier = Modifier
-//                                .clip(RoundedCornerShape(6.dp))
-//                                .background(MaterialTheme.colorScheme.primary)
-//                                .padding(3.dp)
-//                        )
-//                        StarRating(nativeAd.starRating)
-//                    }
-//                }
-//            }
-//
-//            // Ad body
-//            nativeAd.body?.let {
-//                Text(
-//                    text = it,
-//                    color = MaterialTheme.colorScheme.primary,
-//                    modifier = Modifier
-//                        .align(Alignment.CenterHorizontally)
-//                        .padding(horizontal = 8.dp),
-//                    style = TextStyle(color = Color.Gray)
-//                )
-//            }
-//
-//            // Call to action button
-//            Button(
-//                onClick = {
-//                    onCTAClicked()
-//                    try {
-//                        nativeAd.performClick(Bundle.EMPTY)
-//                        Log.d("AdLoader", "Call to Action clicked.")
-//                    } catch (e: Exception) {
-//                        Log.e("AdLoader", "Error performing click: ${e.message}")
-//                    }
-//                },
-//                modifier = Modifier
-//                    .align(Alignment.CenterHorizontally)
-//                    .padding(8.dp)
-//            ) {
-//                Text(text = nativeAd.callToAction ?: "Learn More")
-//            }
-//        }
-//
-//    }
-//
-//}
+@Composable
+fun NativeAdComposable(nativeAd: NativeAd, onCTAClicked: () -> Unit) {
+    val cta = nativeAd.callToAction
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+            .clip(RoundedCornerShape(12.dp))
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.onPrimary)
+
+        ) {
+            nativeAd.adChoicesInfo?.let { adChoicesInfo ->
+                Row(
+                    modifier = Modifier
+                        .padding(8.dp)
+
+                        .clickable {
+                            // Handle click on AdChoices info, possibly opening a browser to more info
+                        }
+                ) {
+                    adChoicesInfo.images.forEach { image ->
+                        AsyncImage(
+                            model = image.drawable,
+                            contentDescription = "AdChoices Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Text(
+                        text = adChoicesInfo.text.toString(),
+                        color = Color.Magenta,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
+
+            nativeAd.images?.let { images ->
+                AutoSlidingImageCarousel(
+                    images = images,
+                    modifier = Modifier.fillMaxWidth() // Specify the desired height
+                )
+            }
+            Row {
+                nativeAd.icon?.let { icon ->
+                    AsyncImage(
+                        model = icon.drawable,
+                        contentDescription = "Ad Icon",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .padding(4.dp)
+                    )
+                }
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Ad headline
+                    Text(
+                        text = nativeAd.headline ?: "",
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(8.dp),
+                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
+                    )
+                    Row {
+                        Text(
+                            text = "Ad",
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.primary)
+                                .padding(3.dp)
+                        )
+                        StarRating(nativeAd.starRating)
+                    }
+                }
+            }
+
+            // Ad body
+            nativeAd.body?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(horizontal = 8.dp),
+                    style = TextStyle(color = Color.Gray)
+                )
+            }
+
+            // Call to action button
+            Button(
+                onClick = {
+                    onCTAClicked()
+                    try {
+                        nativeAd.performClick(Bundle.EMPTY)
+                        Log.d("AdLoader", "Call to Action clicked.")
+                    } catch (e: Exception) {
+                        Log.e("AdLoader", "Error performing click: ${e.message}")
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(8.dp)
+            ) {
+                Text(text = nativeAd.callToAction ?: "Learn More")
+            }
+        }
+
+    }
+
+}
 
 @Composable
 fun NativeSmallAdComposable(nativeAd: NativeAd, onCTAClicked: () -> Unit) {
@@ -308,94 +305,6 @@ fun NativeSmallAdComposable(nativeAd: NativeAd, onCTAClicked: () -> Unit) {
 
 }
 
-@Composable
-fun MyAppNativeSmallAdComposable(app: App) {
-    val context = LocalContext.current
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp)
-            .clip(RoundedCornerShape(12.dp))
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.onPrimary)
-        ) {
-
-            Row {
-                app.iconUrl?.let { icon ->
-
-                    AsyncImage(
-                        model = icon,
-                        contentDescription = "Ad Icon",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(60.dp)
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(12.dp))
-
-                    )
-                }
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // Ad headline
-                    Text(
-                        text = app.name ?: "",
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(8.dp),
-                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
-                    )
-                    Row {
-                        Text(
-                            text = "Ad",
-                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(MaterialTheme.colorScheme.primary)
-                                .padding(3.dp)
-                        )
-                        StarRating(4.5)
-                    }
-                }
-            }
-
-            // Ad body
-            app.description?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(horizontal = 8.dp),
-                    style = TextStyle(color = Color.Gray)
-                )
-            }
-
-            // Call to action button
-            Button(
-                onClick = {
-                    try {
-                        AppUtil.openUrl(context, app.appUrl!!)
-                    } catch (e: Exception) {
-                        Log.e("AdLoader", "Error performing click: ${e.message}")
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(8.dp)
-            ) {
-                Text(text = app.callToAction ?: "Learn More")
-            }
-        }
-
-    }
-
-}
 
 @Composable
 fun AutoSlidingImageCarousel(
@@ -472,6 +381,5 @@ fun StarRating(rating: Double?, maxRating: Int = 5) {
         }
     }
 }
-
 
 

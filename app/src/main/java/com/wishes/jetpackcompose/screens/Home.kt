@@ -68,7 +68,6 @@ import com.wishes.jetpackcompose.screens.Latest
 import com.wishes.jetpackcompose.screens.NavigationDrawer
 import com.wishes.jetpackcompose.screens.comp.AdBannerApp
 import com.wishes.jetpackcompose.screens.comp.Ads.MyAppNativeSmallAdComposable
-import com.wishes.jetpackcompose.screens.comp.Ads.NativeAdComposable
 import com.wishes.jetpackcompose.screens.comp.Ads.NativeSmallAdComposable
 import com.wishes.jetpackcompose.ui.theme.Inter
 import com.wishes.jetpackcompose.utlis.AppUtil

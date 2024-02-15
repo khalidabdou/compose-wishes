@@ -25,12 +25,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import com.github.composeadmobkit.NativeAdComposable
 import com.google.android.gms.ads.nativead.NativeAd
 import com.wishes.jetpackcompose.data.entities.App
 import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.data.entities.Latest
 import com.wishes.jetpackcompose.screens.comp.Ads.MyAppNativeSmallAdComposable
-import com.wishes.jetpackcompose.screens.comp.Ads.NativeAdComposable
 import com.wishes.jetpackcompose.screens.comp.EmptyState
 import com.wishes.jetpackcompose.screens.comp.ImageItem
 import com.wishes.jetpackcompose.screens.comp.LoadingShimmerEffectImage

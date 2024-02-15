@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.composeadmobkit.NativeAdComposable
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -39,7 +40,6 @@ import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.admob.showInterstitialAfterClick
 import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.screens.comp.Ads.MyAppNativeSmallAdComposable
-import com.wishes.jetpackcompose.screens.comp.Ads.NativeAdComposable
 import com.wishes.jetpackcompose.screens.comp.EmptyState
 import com.wishes.jetpackcompose.utlis.AppUtil.getUriImage
 import com.wishes.jetpackcompose.utlis.AppUtil.imagesBitmap
@@ -90,22 +90,28 @@ fun ViewPagerImages(
     addOrRemoveFromFav: (Image) -> Unit
 ) {
 
-    val images = viewModel.currentListImage.collectAsState(Resource.Loading()).value.data
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         var currentPage = page ?: 0
         val pagerState = rememberPagerState(currentPage)
         val scope = rememberCoroutineScope()
         val isFav = viewModel.isImageFavorited.collectAsState()
 
+        var images = viewModel.currentListImage.collectAsState().value
 
-//        val mixedItems =
-//            adsViewModel.injectAdsIntoImagesList(
-//                images,
-//                viewModel.appDetails.value.data?.advertisements ?: emptyList(),
-//                4
-//            )
-        LaunchedEffect(key1 = images?.get(pagerState.currentPage)) {
-            val currentItem = images?.get(pagerState.currentPage)
+        // Determine the content to display based on the current view pager type
+        when (viewModel.currentViewPagerType) {
+            ImagesViewModel.VIEW_PAGER.LATEST -> {
+                images = viewModel.imagesWithAd.collectAsState().value
+            }
+            ImagesViewModel.VIEW_PAGER.FAVORITES -> {
+                images = viewModel.favorites.collectAsState().value
+            }
+            ImagesViewModel.VIEW_PAGER.BY_CATEGORY -> {
+                images = viewModel.imagesByCategory.collectAsState().value
+            }
+        }
+        LaunchedEffect(key1 = images.data?.get(pagerState.currentPage)) {
+            val currentItem = images.data?.get(pagerState.currentPage)
             // Assuming GridItem.Content represents your images
             if (currentItem is GridItem.Content) {
                 // Now you need to extract the image information from GridItem.Content
@@ -115,13 +121,13 @@ fun ViewPagerImages(
         }
 
 
-        if (!images.isNullOrEmpty()) {
+        if (!images.data.isNullOrEmpty()) {
             HorizontalPager(
                 modifier = Modifier.weight(9f),
-                count = images.size, // Use the size of mixedItems
+                count = images.data!!.size, // Use the size of mixedItems
                 state = pagerState,
             ) { page ->
-                when (val item = images[page]) {
+                when (val item = images.data!![page]) {
                     is GridItem.Ad -> {
                         // Correctly cast and pass the nativeAd from the item
                         Box(
@@ -131,7 +137,7 @@ fun ViewPagerImages(
                             contentAlignment = Alignment.Center
                         ) {
                             NativeAdComposable(nativeAd = item.nativeAd) {
-                                // Additional handling for ad if necessary
+
                             }
                         }
 
@@ -179,7 +185,7 @@ fun ViewPagerImages(
                     stringResource(R.string.fav),
                     if (isFav.value) (Icons.Default.Favorite) else (Icons.Default.FavoriteBorder)
                 ) {
-                    val currentItem = images[pagerState.currentPage]
+                    val currentItem = images.data!![pagerState.currentPage]
                     if (currentItem is GridItem.Content)
                         addOrRemoveFromFav(currentItem.image)
                     showInterstitialAfterClick(context)
@@ -191,7 +197,7 @@ fun ViewPagerImages(
                 }*/
                 Action(stringResource(R.string.share_icon), Icons.Outlined.Share) {
 
-                    val currentItem = images[pagerState.currentPage]
+                    val currentItem = images.data!![pagerState.currentPage]
                     if (currentItem is GridItem.Content)
                         imagesBitmap[currentItem.image.id]?.let {
                             val uri: Uri? = getUriImage(it, context)
