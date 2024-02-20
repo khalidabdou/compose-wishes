@@ -2,6 +2,7 @@ package com.wishes.jetpackcompose.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -23,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -44,9 +46,11 @@ import com.wishes.jetpackcompose.screens.comp.EmptyState
 import com.wishes.jetpackcompose.utlis.AppUtil.getUriImage
 import com.wishes.jetpackcompose.utlis.AppUtil.imagesBitmap
 import com.wishes.jetpackcompose.utlis.AppUtil.shareImageUri
+import com.wishes.jetpackcompose.utlis.Const
 import com.wishes.jetpackcompose.utlis.DEFAULT_RECIPE_IMAGE
 import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.utlis.loadPicture
+import com.wishes.jetpackcompose.utlis.loadPicturetemmp
 import com.wishes.jetpackcompose.viewModel.AdsViewModel
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 
@@ -145,22 +149,23 @@ fun ViewPagerImages(
 
                     is GridItem.App -> {
                         MyAppNativeSmallAdComposable(item.app)
-
                     }
 
                     is GridItem.Content -> {
                         currentPage = page
                         // Use item.imageUrl which is already a complete URL from your mixedItems list
-                        val image = loadPicture(
-                            url = item.image.url!!,
+                        val image: MutableState<Bitmap?>? = loadPicturetemmp(
+                            url = Const.BASE_URL + item.image.url,
                             defaultImage = DEFAULT_RECIPE_IMAGE
-                        ).value
+                        )
                         Box(modifier = Modifier.fillMaxSize()) {
                             image?.let { img ->
-                                Image(
-                                    bitmap = img.asImageBitmap(), contentDescription = null,
-                                    modifier = Modifier.fillMaxSize()
-                                )
+                                img.value?.let {
+                                    Image(
+                                        bitmap = it.asImageBitmap(), contentDescription = null,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
                                 // Assuming imagesBitmap is a way to cache or keep track of loaded images
                                 // images[page].id might not directly correspond here due to ads adjustment
                                 // You might need a mapping or a way to retrieve the correct image ID if necessary

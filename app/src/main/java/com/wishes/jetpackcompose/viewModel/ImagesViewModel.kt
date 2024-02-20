@@ -9,10 +9,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.wishes_jetpackcompose.GridItemCategory
 import com.google.android.gms.ads.nativead.NativeAd
 import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.data.entities.AppDetails
-import com.wishes.jetpackcompose.data.entities.Category
 import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.data.entities.Latest
 import com.wishes.jetpackcompose.repo.ImagesRepo
@@ -66,8 +66,8 @@ class ImagesViewModel @Inject constructor(
     val favorites: StateFlow<Resource<List<GridItem>>> = _favorites.asStateFlow()
 
 
-    private val _categories = MutableStateFlow<Resource<List<Category>>>(Resource.Loading())
-    val categories: StateFlow<Resource<List<Category>>> = _categories.asStateFlow()
+    private val _categories = MutableStateFlow<Resource<List<GridItemCategory>>>(Resource.Loading())
+    val categories: StateFlow<Resource<List<GridItemCategory>>> = _categories.asStateFlow()
 
     var offset by mutableStateOf(0)
 
@@ -84,6 +84,13 @@ class ImagesViewModel @Inject constructor(
 
     val isImageFavorited = MutableStateFlow<Boolean>(false)
 
+    val adConverter: (NativeAd) -> GridItem = { nativeAd ->
+        GridItem.Ad(nativeAd)
+    }
+    val adConverter2: (NativeAd) -> GridItemCategory = { nativeAd ->
+        GridItemCategory.Ad(nativeAd)
+    }
+
 
     fun getLatestImages() {
         viewModelScope.launch {
@@ -99,8 +106,7 @@ class ImagesViewModel @Inject constructor(
 
                         // Emit the transformed list wrapped in `Resource.Success`
                         _imagesWithAd.emit(Resource.Success(imagesList))
-                        updateListWithAdsAndEmit(_imagesWithAd, _ads.value)
-                    }
+                        updateListWithAdsAndEmit(_imagesWithAd, _ads.value, adConverter)                    }
 
                     is Resource.Loading -> {
                         _imagesWithAd.emit(Resource.Loading())
@@ -184,20 +190,21 @@ class ImagesViewModel @Inject constructor(
                     currentResource.data ?: emptyList()
                 }
             }
-            _imagesWithAd.emit(Resource.Success(updatedList))
+            currentListImage.emit(Resource.Success(updatedList))
         }
     }
 
-    private fun updateListWithAdsAndEmit(
-        targetFlow: MutableStateFlow<Resource<List<GridItem>>>,
-        newAds: List<NativeAd>
+    private fun <T> updateListWithAdsAndEmit(
+        targetFlow: MutableStateFlow<Resource<List<T>>>,
+        newAds: List<NativeAd>,
+        adConverter: (NativeAd) -> T
     ) {
         viewModelScope.launch {
             val currentResource = targetFlow.value
             val updatedList = when (currentResource) {
                 is Resource.Success -> {
                     val currentList = currentResource.data ?: emptyList()
-                    currentList.integrateAds(newAds)
+                    currentList.integrateAds(newAds,adConverter)
                 }
 
                 else -> currentResource.data ?: emptyList()
@@ -264,8 +271,16 @@ class ImagesViewModel @Inject constructor(
         viewModelScope.launch {
             viewModelScope.launch {
                 val params = HashMap<String, Any>()
-                imageRepo.getCategories(params).collect {
-                    _categories.emit(it)
+                imageRepo.getCategories(params).collect {categorisresult->
+                    val categories = categorisresult.data?.let { cat ->
+                        cat.map {
+                            GridItemCategory.Content(it)
+                        }
+                    } ?: emptyList()
+
+                    // Emit the transformed list wrapped in `Resource.Success`
+                    _categories.emit(Resource.Success(categories))
+                    updateListWithAdsAndEmit(_categories, _ads.value,adConverter2)
                 }
             }
         }
@@ -280,8 +295,7 @@ class ImagesViewModel @Inject constructor(
             } ?: emptyList()
 
             _favorites.emit(Resource.Success(gridItems))
-            updateListWithAdsAndEmit(_favorites, _ads.value)
-
+            updateListWithAdsAndEmit(_favorites, _ads.value,adConverter)
         }
     }
 

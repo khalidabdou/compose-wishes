@@ -69,9 +69,8 @@ fun Categories(
 
     when (categories.value) {
         is Resource.Success -> {
-            //val mixedItems =
-               // categories.value.data?.let { adsViewModel.injectAdsIntoCategoryList(it, 2) }
-            //CategoryListWithAds(mixedItems!!,paddingValues,navHostController)
+
+            CategoryListWithAds(categories.value.data!!,paddingValues,navHostController)
         }
 
         is Resource.Loading -> {

@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import com.github.composeadmobkit.NativeAdComposable
+
 import com.google.android.gms.ads.nativead.NativeAd
 import com.wishes.jetpackcompose.data.entities.App
 import com.wishes.jetpackcompose.data.entities.Image
@@ -38,7 +39,6 @@ import com.wishes.jetpackcompose.utlis.Const
 import com.wishes.jetpackcompose.utlis.DEFAULT_RECIPE_IMAGE
 import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.utlis.loadPicturetemmp
-import com.wishes.jetpackcompose.viewModel.AdsViewModel
 
 @Composable
 fun Latest(
