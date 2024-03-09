@@ -1,6 +1,7 @@
 package com.wishes.jetpackcompose.data.entities
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
 data class Ad(
     val id: Int,
@@ -12,6 +13,8 @@ data class Ad(
 )
 
 
+
+@Serializable
 data class AppDetails(
     val id: Int,
     val name: String,
@@ -21,6 +24,8 @@ data class AppDetails(
     val largePhotoUrl: String?,
     val privacyUrl: String?,
     val store :String?,
+    @SerializedName("Applanguages")
+    val Applanguages: List<AppLanguageWrapper>?,
     val ads: List<Ad>,
     val advertisements: List<App>,
     val advertisedBy: List<App>

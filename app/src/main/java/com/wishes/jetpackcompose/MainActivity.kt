@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 val context = LocalContext.current
                 navController = rememberNavController()
-
+                
                 Surface() {
                     Column(modifier = Modifier.padding()) {
                         Box(modifier = Modifier.weight(1f)) {

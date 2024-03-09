@@ -1,5 +1,6 @@
 package com.wishes.jetpackcompose.runtime
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
@@ -13,10 +14,12 @@ import com.example.wishes_jetpackcompose.Home
 import com.wishes.jetpackcompose.data.entities.Page
 import com.wishes.jetpackcompose.screens.Splash
 import com.wishes.jetpackcompose.screens.ViewPager
+import com.wishes.jetpackcompose.screens.comp.LanguageScreen
 import com.wishes.jetpackcompose.viewModel.AdsViewModel
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun NavigationHost(navController: NavHostController,viewModel: ImagesViewModel,adsViewModel: AdsViewModel) {
 
@@ -28,6 +31,10 @@ fun NavigationHost(navController: NavHostController,viewModel: ImagesViewModel,a
 
         composable(NavRoutes.Home.route) {
             Home(viewModel,adsViewModel, navController)
+        }
+
+        composable(NavRoutes.Languages.route) {
+            LanguageScreen(viewModel)
         }
 
         composable(NavRoutes.Favorites.route) {

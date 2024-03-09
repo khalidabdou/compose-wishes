@@ -14,6 +14,8 @@ sealed class NavRoutes(val route: String) {
     object Categories : NavRoutes("categories")
     object ViewPager : NavRoutes("viewPager")
     object ByCat : NavRoutes("byCat")
+
+    object Languages : NavRoutes("languages")
     object Splash : NavRoutes("splash")
 }
 

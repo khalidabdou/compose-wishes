@@ -24,4 +24,6 @@ interface ImageInterface {
 
     suspend fun getAppDetails (): Flow<Resource<AppDetails>>
 
+
+
 }

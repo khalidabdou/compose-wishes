@@ -18,7 +18,7 @@ class Const {
 
         //const val BASE_URL = "http://192.168.8.102:2024"
         //const val BASE_URL = "http://192.168.100.232:2024"
-        const val BASE_URL = "http://192.168.8.101:2024"
+        const val BASE_URL = "http://192.168.192.10:2024"
 
         //192.168.100.205
         //192.168.43.214
@@ -38,6 +38,8 @@ class Const {
 
         fun GET_APP_DETAILS (packageName: String) = BASE_URL + "/app/$packageName/details"
 
+
+        fun GET_LANGUAGES(packageName: String) = BASE_URL+"/languages/$packageName"
 
         var LANGUAGE_ID: Int = 4
         var RANDOM = (0..10000).random()

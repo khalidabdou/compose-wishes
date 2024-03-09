@@ -74,7 +74,7 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel,adsViewM
             Log.d("app", "loading")
         }
         is Resource.Success -> {
-            navController.navigate(NavRoutes.Home.route)
+            navController.navigate(NavRoutes.Languages.route)
         }
 
         else -> {
@@ -83,7 +83,7 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel,adsViewM
                 startAnimation = true
                 delay(2000)
                 navController.popBackStack()
-                navController.navigate(NavRoutes.Home.route)
+                navController.navigate(NavRoutes.Languages.route)
                 //Toast.makeText(context, "${viewModel.adsList.value}", Toast.LENGTH_LONG).show()
             }
         }
