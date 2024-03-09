@@ -124,23 +124,26 @@ class ImagesViewModel @Inject constructor(
 
 
     fun loadMore() {
+
         showProgressLoadMore = true
         viewModelScope.launch {
-            val offset = _images.value.data?.images?.size ?: 0
+            val offset = _imagesWithAd.value.data?.size ?: 0
+            Log.d("loadMore","$offset")
             val params = HashMap<String, Any>().apply {
                 put("offset", offset)
             }
             imageRepo.getImages(params).collect { result ->
                 when (result) {
                     is Resource.Success -> {
-                        val currentImages = _images.value.data?.images ?: emptyList()
-                        val newImages = result.data?.images ?: emptyList()
-                        val allImages = currentImages + newImages
-                        _images.emit(
-                            Resource.Success(
-                                _images.value.data?.copy(images = allImages) ?: result.data
-                            )
-                        )
+                        val currentImages = _imagesWithAd.value.data ?: emptyList()
+
+                        val imagesList = result.data?.let { latest ->
+                            latest.images.map {
+                                GridItem.Content(it)
+                            }
+                        } ?: emptyList()
+                        val allImages = currentImages + imagesList
+                        _imagesWithAd.emit(Resource.Success(allImages))
                         showProgressLoadMore = false
                     }
 

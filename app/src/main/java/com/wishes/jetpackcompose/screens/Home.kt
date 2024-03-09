@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -66,9 +65,7 @@ import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.runtime.NavRoutes
 import com.wishes.jetpackcompose.screens.Latest
 import com.wishes.jetpackcompose.screens.NavigationDrawer
-import com.wishes.jetpackcompose.screens.comp.AdBannerApp
 import com.wishes.jetpackcompose.screens.comp.Ads.MyAppNativeSmallAdComposable
-import com.wishes.jetpackcompose.screens.comp.Ads.NativeSmallAdComposable
 import com.wishes.jetpackcompose.ui.theme.Inter
 import com.wishes.jetpackcompose.utlis.AppUtil
 import com.wishes.jetpackcompose.utlis.Resource
@@ -100,7 +97,8 @@ fun Home(viewModel: ImagesViewModel,adsViewModel: AdsViewModel, navHostControlle
     var isDrawerOpen by remember { mutableStateOf(false) }
     var showAlertDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.getLatestImages()
+        if (latest.value.data.isNullOrEmpty())
+            viewModel.getLatestImages()
     }
 
     LaunchedEffect(isCategoriesSelected) {
