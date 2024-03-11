@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 data class AppLanguage(
     val id :Int,
     val name :String,
+    val label :String?
 )
 @Serializable
 data class AppLanguageWrapper(

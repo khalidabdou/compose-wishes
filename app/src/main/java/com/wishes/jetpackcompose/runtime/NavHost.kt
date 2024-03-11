@@ -3,7 +3,6 @@ package com.wishes.jetpackcompose.runtime
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,7 +10,6 @@ import com.example.wishes_jetpackcompose.ByCat
 import com.example.wishes_jetpackcompose.Categories
 import com.example.wishes_jetpackcompose.Favorites
 import com.example.wishes_jetpackcompose.Home
-import com.wishes.jetpackcompose.data.entities.Page
 import com.wishes.jetpackcompose.screens.Splash
 import com.wishes.jetpackcompose.screens.ViewPager
 import com.wishes.jetpackcompose.screens.comp.LanguageScreen
@@ -34,7 +32,7 @@ fun NavigationHost(navController: NavHostController,viewModel: ImagesViewModel,a
         }
 
         composable(NavRoutes.Languages.route) {
-            LanguageScreen(viewModel)
+            LanguageScreen(navHostController = navController, viewModel = viewModel)
         }
 
         composable(NavRoutes.Favorites.route) {

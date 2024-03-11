@@ -1,6 +1,7 @@
 package com.wishes.jetpackcompose.utlis
 
 import android.util.Log
+import com.wishes.jetpackcompose.data.entities.AppLanguage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.features.ClientRequestException
@@ -42,7 +43,7 @@ private fun String.toValidJson(): JSONObject {
 
 class ClientApiManager @Inject constructor(
     private val client: HttpClient,
-    private val myDataStore: DataStore
+    private val myDataStore: DataStoreManager
 ) {
     private fun List<*>.toJsonElement(): JsonElement {
         val list: MutableList<JsonElement> = mutableListOf()
@@ -98,8 +99,10 @@ class ClientApiManager @Inject constructor(
     ) {
 
         //val language = "en "
-        val token = myDataStore.getToken.first()
+        val token = ""//myDataStore.getToken.first()
+        val language = myDataStore.read<AppLanguage>("appLanguage", AppLanguage(0,"","")).first()
         Log.d("token",token.toString())
+        Log.d("language",language?.name.toString())
 
 
         try {
@@ -169,7 +172,7 @@ class ClientApiManager @Inject constructor(
                                     )
                                 }
                             formData {
-                                //parameter("lang", language)
+                                parameter("lang", language)
                             }
                         }
                     }

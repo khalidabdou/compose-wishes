@@ -38,10 +38,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.google.android.gms.ads.nativead.NativeAd
 import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.runtime.NavRoutes
-
 import com.wishes.jetpackcompose.screens.comp.Ads.loadNativeAd
 import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.viewModel.AdsViewModel
@@ -55,6 +53,7 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel,adsViewM
     val context = LocalContext.current
     var startAnimation by remember { mutableStateOf(false) }
     val appDetails = viewModel.appDetails.collectAsState()
+    val language = viewModel.appLanguage.collectAsState()
     //var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
     LaunchedEffect(Unit) {
         Log.d("app", "Success")
@@ -74,7 +73,9 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel,adsViewM
             Log.d("app", "loading")
         }
         is Resource.Success -> {
-            navController.navigate(NavRoutes.Languages.route)
+            if (language.value != null)
+            navController.navigate(NavRoutes.Home.route)
+            else   navController.navigate(NavRoutes.Languages.route)
         }
 
         else -> {
@@ -183,7 +184,7 @@ fun AnimateImageScaleAndRotate() {
                             Color.Transparent, // Top color
                             MaterialTheme.colorScheme.background,
 
-                        )
+                            )
                     )
                 )
         )

@@ -13,9 +13,11 @@ import com.example.wishes_jetpackcompose.GridItemCategory
 import com.google.android.gms.ads.nativead.NativeAd
 import com.wishes.jetpackcompose.R
 import com.wishes.jetpackcompose.data.entities.AppDetails
+import com.wishes.jetpackcompose.data.entities.AppLanguage
 import com.wishes.jetpackcompose.data.entities.Image
 import com.wishes.jetpackcompose.data.entities.Latest
 import com.wishes.jetpackcompose.repo.ImagesRepo
+import com.wishes.jetpackcompose.repo.SettingRepository
 import com.wishes.jetpackcompose.screens.GridItem
 import com.wishes.jetpackcompose.utlis.AdsUtil
 import com.wishes.jetpackcompose.utlis.Const.Companion.hasConnection
@@ -34,6 +36,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ImagesViewModel @Inject constructor(
     private val imageRepo: ImagesRepo,
+    private val settingRepository: SettingRepository,
     application: Application
 ) : AndroidViewModel(application) {
     val LOG_IMAGE: String = "response_image"
@@ -43,7 +46,6 @@ class ImagesViewModel @Inject constructor(
         FAVORITES,
         BY_CATEGORY
     }
-
 
     private val _ads = MutableStateFlow<List<NativeAd>>(emptyList())
     val ads = _ads.asStateFlow()
@@ -73,6 +75,8 @@ class ImagesViewModel @Inject constructor(
 
     private val _appDetails = MutableStateFlow<Resource<AppDetails>>(Resource.Loading())
     val appDetails: StateFlow<Resource<AppDetails>> = _appDetails.asStateFlow()
+    private val _appLanguage = MutableStateFlow<AppLanguage?>(null)
+    val appLanguage: StateFlow<AppLanguage?> = _appLanguage.asStateFlow()
 
 
     //viewpager
@@ -91,6 +95,13 @@ class ImagesViewModel @Inject constructor(
         GridItemCategory.Ad(nativeAd)
     }
 
+    init {
+        viewModelScope.launch {
+            settingRepository.readAppLanguage().collect() { language ->
+                _appLanguage.value = language
+            }
+        }
+    }
 
     fun getLatestImages() {
         viewModelScope.launch {
@@ -340,8 +351,6 @@ class ImagesViewModel @Inject constructor(
             }
         }
     }
-
-
     //suspend fun isFav(): Boolean = imageRepo.isImageInFav(currentListImage!!.get(currentPage!!))
 
     fun getAppDetails() {
@@ -387,6 +396,11 @@ class ImagesViewModel @Inject constructor(
 
 
     fun hasInternetConnection(): Boolean = hasConnection(getApplication())
+        fun saveLanguage(appLanguage: AppLanguage) {
+            viewModelScope.launch {
+                settingRepository.saveLanguage(appLanguage)
+            }
+        }
 
 
 }

@@ -3,6 +3,8 @@ package com.wishes.jetpackcompose.screens.comp
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,10 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.RadioButtonColors
 import androidx.compose.material.Text
-import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,15 +28,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.wishes.jetpackcompose.data.entities.AppLanguage
+import com.wishes.jetpackcompose.runtime.NavRoutes
 import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.viewModel.ImagesViewModel
 
 
 @Composable
-fun LanguageScreen(viewModel: ImagesViewModel) {
+fun LanguageScreen(navHostController: NavHostController, viewModel: ImagesViewModel) {
     val languageResource by viewModel.appDetails.collectAsState()
     var selectedLanguage by remember { mutableStateOf<AppLanguage?>(null) }
+
 
     Column {
         when (languageResource) {
@@ -62,6 +65,7 @@ fun LanguageScreen(viewModel: ImagesViewModel) {
                                 isSelected = languages[index].appLanguage == selectedLanguage
                             ) {
                                 selectedLanguage = it
+
                             }
                         }
                     }
@@ -86,7 +90,13 @@ fun LanguageScreen(viewModel: ImagesViewModel) {
         selectedLanguage?.let {
             AnimatedVisibility(visible = selectedLanguage!=null) {
                 Button(
-                    onClick = { selectedLanguage?.let {} },
+                    onClick = {
+                        selectedLanguage?.let {
+                            viewModel.saveLanguage(it)
+                            navHostController.popBackStack()
+                            navHostController.navigate(NavRoutes.Home.route)
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -110,18 +120,31 @@ fun ItemLanguage(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colors.background),
+            .clip(RoundedCornerShape(12.dp)) // Keep the rounded corners
+            .then(
+                if (isSelected) {
+                    Modifier
+                        .border(
+                            width = 2.dp, // You can adjust the border thickness here
+                            color = MaterialTheme.colors.onPrimary, // This can be any color to indicate selection
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .background(MaterialTheme.colors.primarySurface)
+                } else Modifier.background(MaterialTheme.colors.primary)
+            )
+            //
+            .clickable { onLanguageSelected(language) } // Adding clickable here to make the whole Row clickable
+            .padding(16.dp), // Padding inside the row, adjust as needed
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(
-            selected = isSelected,
-
-            onClick = { onLanguageSelected(language) }
-        )
-        Text(
-            text = language.name,
-            modifier = Modifier.padding(start = 16.dp)
-        )
+        Column(modifier = Modifier.padding(start = 16.dp)) {
+            Text(
+                text = language.name,
+                color = MaterialTheme.colors.onPrimary
+            )
+            Text(
+                text = language.label ?: ""
+            )
+        }
     }
 }

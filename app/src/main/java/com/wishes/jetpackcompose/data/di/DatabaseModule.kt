@@ -8,8 +8,9 @@ import com.wishes.jetpackcompose.data.WallDatabase
 import com.wishes.jetpackcompose.data.interfaces.ImageInterface
 import com.wishes.jetpackcompose.data.repositories.RemoteDataSource
 import com.wishes.jetpackcompose.repo.ImagesRepo
+import com.wishes.jetpackcompose.repo.SettingRepository
 import com.wishes.jetpackcompose.utlis.ClientApiManager
-import com.wishes.jetpackcompose.utlis.DataStore
+import com.wishes.jetpackcompose.utlis.DataStoreManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -56,9 +57,16 @@ object DatabaseModule {
         return ImagesRepo(remoteDataSource, localDataSource)
     }
 
+
     @Provides
     @Singleton
-    fun provideDataStore(@ApplicationContext appContext: Context) = DataStore(appContext)
+    fun provideSettingRepo(dataStoreManager: DataStoreManager): SettingRepository {
+        return SettingRepository(dataStoreManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDataStore(@ApplicationContext appContext: Context) = DataStoreManager(appContext)
 
     @RequiresApi(Build.VERSION_CODES.O)
     @Provides

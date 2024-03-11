@@ -11,30 +11,48 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
+import androidx.datastore.preferences.core.*
+import com.google.gson.Gson
 
 
-class DataStore(private val context: Context) {
+import kotlinx.coroutines.flow.map
 
-    private val TOKEN_KEY = stringPreferencesKey("token")
-    private val THEME_KEY = intPreferencesKey("theme")
-    private val LANGUAGE_KEY = stringPreferencesKey("language")
-    val USER_KEY = stringPreferencesKey("user")
-    val TEXT_KEY = stringPreferencesKey("text_key")
+// Assuming the Context.dataStore extension property is defined somewhere else in your codebase, like:
 
 
 
-    // Function to save token
 
-    val getToken: Flow<String?> = context.dataStore.data.map { preferences ->
-        val token = preferences[TOKEN_KEY]
-        if (token.isNullOrBlank())
-            null
-        else
-            token
+class DataStoreManager(val context: Context) {
+    val Context.dataStore by preferencesDataStore(name = "my_data_store")
+
+    internal val gson = Gson()
+
+    suspend inline fun <reified T> save(key: String, value: T) {
+        val dataKey = stringPreferencesKey(key)
+        val valueToSave: String = when (value) {
+            is String, is Int, is Boolean, is Float, is Long -> value.toString()
+            else -> Gson().toJson(value) // Serialize complex objects
+        }
+        context.dataStore.edit { preferences ->
+            preferences[dataKey] = valueToSave
+        }
     }
 
+    inline fun <reified T> read(key: String, defaultValue: T): Flow<T?> = context.dataStore.data.map { preferences ->
+        val dataKey = stringPreferencesKey(key)
+        val value = preferences[dataKey] ?: return@map defaultValue
 
-
+        when (T::class) {
+            String::class, Int::class, Boolean::class, Float::class, Long::class -> value
+            else -> try {
+                Gson().fromJson(value, T::class.java)
+            } catch (e: Exception) {
+                defaultValue
+            }
+        } as T?
+    }
 }
+
+
 
 
