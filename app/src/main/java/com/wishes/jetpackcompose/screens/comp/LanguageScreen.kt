@@ -2,20 +2,31 @@ package com.wishes.jetpackcompose.screens.comp
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,11 +53,26 @@ fun LanguageScreen(navHostController: NavHostController, viewModel: ImagesViewMo
 
 
     Column {
+        Spacer(modifier = Modifier.height(20.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Select Your Language",
+                color = MaterialTheme.colors.onPrimary,
+                style = MaterialTheme.typography.h6
+            )
+        }
+
         when (languageResource) {
             is Resource.Loading -> {
                 // Display a loading indicator
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
+
 
             is Resource.Success -> {
                 Log.d("languages", languageResource.data.toString())
@@ -87,8 +113,22 @@ fun LanguageScreen(navHostController: NavHostController, viewModel: ImagesViewMo
             }
         }
 
+
+
         selectedLanguage?.let {
-            AnimatedVisibility(visible = selectedLanguage!=null) {
+            AnimatedVisibility(
+                visible = selectedLanguage != null,
+                enter = slideInVertically(
+                    // Start the animation from the bottom of the component
+                    initialOffsetY = { fullHeight -> fullHeight },
+                    animationSpec = tween(durationMillis = 300)
+                ),
+                exit = slideOutVertically(
+                    // Exit towards the bottom of the screen
+                    targetOffsetY = { fullHeight -> fullHeight },
+                    animationSpec = tween(durationMillis = 300)
+                )
+            ) {
                 Button(
                     onClick = {
                         selectedLanguage?.let {
@@ -102,10 +142,15 @@ fun LanguageScreen(navHostController: NavHostController, viewModel: ImagesViewMo
                         .padding(16.dp),
                     enabled = selectedLanguage != null
                 ) {
-                    Text("Next")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
+                        Spacer(Modifier.width(8.dp)) // Add space between the icon and text
+                        Text("Next")
+                    }
                 }
             }
         }
+
 
     }
 }
@@ -140,10 +185,13 @@ fun ItemLanguage(
         Column(modifier = Modifier.padding(start = 16.dp)) {
             Text(
                 text = language.name,
-                color = MaterialTheme.colors.onPrimary
+                color = MaterialTheme.colors.onPrimary,
+                style = MaterialTheme.typography.subtitle1
             )
             Text(
-                text = language.label ?: ""
+                text = language.label ?: "",
+                color = MaterialTheme.colors.onPrimary,
+                style = MaterialTheme.typography.subtitle2
             )
         }
     }

@@ -100,9 +100,9 @@ class ClientApiManager @Inject constructor(
 
         //val language = "en "
         val token = ""//myDataStore.getToken.first()
-        val language = myDataStore.read<AppLanguage>("appLanguage", AppLanguage(0,"","")).first()
+        val language = myDataStore.read<AppLanguage>("appLanguage", AppLanguage(0,"","")).first()?.name
         Log.d("token",token.toString())
-        Log.d("language",language?.name.toString())
+        //Log.d("language",language?.name.toString())
 
 
         try {
@@ -130,7 +130,7 @@ class ClientApiManager @Inject constructor(
                                 }
                             }
                             formData {
-                                //parameter("lang", language)
+                                parameter("language", language)
                             }
 
                             if (useBearer)
@@ -172,7 +172,7 @@ class ClientApiManager @Inject constructor(
                                     )
                                 }
                             formData {
-                                parameter("lang", language)
+                                parameter("language", language)
                             }
                         }
                     }
@@ -199,6 +199,9 @@ class ClientApiManager @Inject constructor(
                                     Log.e("request", "url : $url response : ")
 
                                 }
+                            formData {
+                                parameter("language", language)
+                            }
 
                         }
                     }
