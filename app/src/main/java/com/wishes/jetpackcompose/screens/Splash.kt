@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.wishes.jetpackcompose.R
+import com.wishes.jetpackcompose.data.entities.AdProvider
 import com.wishes.jetpackcompose.runtime.NavRoutes
 import com.wishes.jetpackcompose.screens.comp.Ads.loadNativeAd
 import com.wishes.jetpackcompose.utlis.Resource
@@ -63,9 +64,10 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel,adsViewM
 
     LaunchedEffect(Unit) {
         coroutineScope.launch {
-            loadNativeAd(context, "ca-app-pub-3940256099942544/2247696110",) { ad ->
-                viewModel.addAd(ad)
-            }
+            if (AdProvider.NativeAdmob.showAd)
+                loadNativeAd(context, AdProvider.NativeAdmob.pubId) { ad ->
+                    viewModel.addAd(ad)
+                }
         }
     }
     when (appDetails.value) {

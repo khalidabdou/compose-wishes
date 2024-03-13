@@ -50,8 +50,12 @@ class ImagesViewModel @Inject constructor(
     private val _ads = MutableStateFlow<List<NativeAd>>(emptyList())
     val ads = _ads.asStateFlow()
 
+
     private val _images = MutableStateFlow<Resource<Latest>>(Resource.Loading())
     //val latest: StateFlow<Resource<Latest>> = _images.asStateFlow()
+
+    private val _imagesFetched = MutableStateFlow(false)
+    val imagesFetched: StateFlow<Boolean> = _imagesFetched.asStateFlow()
 
     private val _imagesWithAd = MutableStateFlow<Resource<List<GridItem>>>(Resource.Loading())
     val imagesWithAd: StateFlow<Resource<List<GridItem>>> = _imagesWithAd.asStateFlow()
@@ -104,10 +108,13 @@ class ImagesViewModel @Inject constructor(
     }
 
     fun getLatestImages() {
+
         viewModelScope.launch {
             val params = HashMap<String, Any>()
+            _imagesWithAd.emit(Resource.Loading())
             imageRepo.getImages(params).collect { result ->
                 when (result) {
+
                     is Resource.Success -> {
                         val imagesList = result.data?.let { latest ->
                             latest.images.map {
@@ -117,7 +124,10 @@ class ImagesViewModel @Inject constructor(
 
                         // Emit the transformed list wrapped in `Resource.Success`
                         _imagesWithAd.emit(Resource.Success(imagesList))
-                        updateListWithAdsAndEmit(_imagesWithAd, _ads.value, adConverter)                    }
+                        updateListWithAdsAndEmit(_imagesWithAd, _ads.value, adConverter)
+                        _imagesFetched.value = true
+
+                    }
 
                     is Resource.Loading -> {
                         _imagesWithAd.emit(Resource.Loading())
@@ -333,6 +343,7 @@ class ImagesViewModel @Inject constructor(
         }
     }
 
+
     fun setImagesForViewPager(type: VIEW_PAGER) {
         currentViewPagerType = type
         viewModelScope.launch {
@@ -369,6 +380,14 @@ class ImagesViewModel @Inject constructor(
         }
     }
 
+    fun saveLanguage(appLanguage: AppLanguage) {
+        viewModelScope.launch {
+            //_language.emit(appLanguage)
+            _imagesFetched.value = false
+            settingRepository.saveLanguage(appLanguage)
+        }
+    }
+
     fun setMessage(context: Context) {
         val c: Calendar = Calendar.getInstance()
         val timeOfDay: Int = c.get(Calendar.HOUR_OF_DAY)
@@ -396,11 +415,6 @@ class ImagesViewModel @Inject constructor(
 
 
     fun hasInternetConnection(): Boolean = hasConnection(getApplication())
-        fun saveLanguage(appLanguage: AppLanguage) {
-            viewModelScope.launch {
-                settingRepository.saveLanguage(appLanguage)
-            }
-        }
 
 
 }

@@ -26,6 +26,7 @@ object AdsUtil {
             "Interstitial" -> AdProvider.Inter = ad
             "OpenAppAd" -> AdProvider.OpenAd = ad
             "RewardVideo" -> AdProvider.Rewarded = ad
+            "Native" -> AdProvider.NativeAdmob = ad
         }
     }
 }

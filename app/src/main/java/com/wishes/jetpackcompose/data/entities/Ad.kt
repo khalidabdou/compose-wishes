@@ -70,6 +70,15 @@ class AdProvider {
             adPlatform = "AdMob"
         )
 
+        var NativeAdmob: Ad = Ad(
+            id = 0,
+            pubId = "your_pub_id_for_Reward",
+            adType = "Native",
+            showAd = false,
+            adCount = null,
+            adPlatform = "AdMob"
+        )
+
         var BannerFAN: Ad = Ad(
             id = 0,
             pubId = "",

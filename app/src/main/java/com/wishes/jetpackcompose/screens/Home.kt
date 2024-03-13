@@ -24,6 +24,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -48,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,16 +81,15 @@ import kotlin.random.Random
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalPagerApi::class,
     ExperimentalFoundationApi::class
 )
-@ExperimentalCoroutinesApi
 @Composable
 fun Home(viewModel: ImagesViewModel,adsViewModel: AdsViewModel, navHostController: NavHostController) {
     val scrollState = rememberLazyListState(0)
     val context = LocalContext.current
     val message = viewModel.message.collectAsState()
     val latest = viewModel.imagesWithAd.collectAsState(Resource.Loading())
+    val language = viewModel.appLanguage.collectAsState()
     val appDetails = viewModel.appDetails.collectAsState()
 
     var isCategoriesSelected by remember {
@@ -96,9 +97,14 @@ fun Home(viewModel: ImagesViewModel,adsViewModel: AdsViewModel, navHostControlle
     }
     var isDrawerOpen by remember { mutableStateOf(false) }
     var showAlertDialog by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        if (latest.value.data.isNullOrEmpty())
+    val imagesFetched by viewModel.imagesFetched.collectAsState()
+
+    LaunchedEffect(imagesFetched) {
+
+        if (!imagesFetched) {
+            Log.d("languageId",language.value?.id.toString())
             viewModel.getLatestImages()
+        }
     }
 
     LaunchedEffect(isCategoriesSelected) {
@@ -157,7 +163,9 @@ fun Home(viewModel: ImagesViewModel,adsViewModel: AdsViewModel, navHostControlle
                 },
             contentColor = MaterialTheme.colorScheme.background,
             topBar = {
-                TopBar(message.value) {
+                TopBar(message.value, changeLanguage = {
+                    navHostController.navigate(NavRoutes.Languages.route)
+                }) {
                     scope.launch {
                         isDrawerOpen = !isDrawerOpen
                     }
@@ -198,7 +206,6 @@ fun Home(viewModel: ImagesViewModel,adsViewModel: AdsViewModel, navHostControlle
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                 }
-
             },
 
 
@@ -293,7 +300,7 @@ fun Home(viewModel: ImagesViewModel,adsViewModel: AdsViewModel, navHostControlle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(title: String, onDrawer: () -> Unit) {
+fun TopBar(title: String, changeLanguage: () -> Unit, onDrawer: () -> Unit) {
     val infiniteTransition = rememberInfiniteTransition()
     TopAppBar(
         modifier = Modifier.clickable { onDrawer() },
@@ -325,6 +332,18 @@ fun TopBar(title: String, onDrawer: () -> Unit) {
         },
         actions = {
 
+            IconButton(
+                onClick = {
+                    changeLanguage()
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Language,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    contentDescription = null,
+                    modifier = Modifier
+                )
+            }
 
             /*if (isMoreOptionPopupShowed) {
                 MoreOptionPopup(
