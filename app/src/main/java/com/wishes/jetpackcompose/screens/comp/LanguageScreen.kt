@@ -26,9 +26,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.wishes.jetpackcompose.data.entities.AppLanguage
@@ -51,6 +51,13 @@ fun LanguageScreen(navHostController: NavHostController, viewModel: ImagesViewMo
     val languageResource by viewModel.appDetails.collectAsState()
     var selectedLanguage by remember { mutableStateOf<AppLanguage?>(null) }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(key1 = viewModel) {
+        viewModel.navigationEvent.collect { event ->
+            navHostController.popBackStack()
+            navHostController.navigate(NavRoutes.Home.route)
+        }
+    }
 
     Column {
         Spacer(modifier = Modifier.height(20.dp))
@@ -133,8 +140,6 @@ fun LanguageScreen(navHostController: NavHostController, viewModel: ImagesViewMo
                     onClick = {
                         selectedLanguage?.let {
                             viewModel.saveLanguage(it)
-                            navHostController.popBackStack()
-                            navHostController.navigate(NavRoutes.Home.route)
                         }
                     },
                     modifier = Modifier
@@ -174,8 +179,8 @@ fun ItemLanguage(
                             color = MaterialTheme.colors.onPrimary, // This can be any color to indicate selection
                             shape = RoundedCornerShape(12.dp)
                         )
-                        .background(MaterialTheme.colors.primarySurface)
-                } else Modifier.background(MaterialTheme.colors.primary)
+                        .background(MaterialTheme.colors.primaryVariant)
+                } else Modifier.background(MaterialTheme.colors.primaryVariant)
             )
             //
             .clickable { onLanguageSelected(language) } // Adding clickable here to make the whole Row clickable

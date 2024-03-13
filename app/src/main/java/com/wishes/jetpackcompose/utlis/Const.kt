@@ -17,13 +17,16 @@ class Const {
         const val TABLE_WALLPAPER = "tbl_wallpaper"
 
         //home wifi
-        const val BASE_URL = "http://192.168.8.102:2024"
-        //const val BASE_URL = "http://192.168.8.101:2024"
+        //const val BASE_URL = "http://192.168.8.102:2024"
+        //const val BASE_YRL = "http://192.168.8.101:2024"
         //const val BASE_URL = "http://192.168.192.10:2024"
 
 
         //win by inwi
         //const val BASE_URL = "http://192.168.43.214:2024"
+
+        //server
+        const val BASE_URL = "http://wishes2024.specialones.online"
 
         //192.168.100.205
         //192.168.43.214

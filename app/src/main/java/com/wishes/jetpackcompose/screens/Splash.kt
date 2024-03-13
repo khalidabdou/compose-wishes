@@ -150,7 +150,7 @@ fun Splash(navController: NavHostController, viewModel: ImagesViewModel,adsViewM
 fun AnimateImageScaleAndRotate() {
     var scaledUp by remember { mutableStateOf(false) }
     val scale = animateFloatAsState(
-        targetValue = if (scaledUp) 3f else 2f,
+        targetValue = if (scaledUp) 2.5f else 2f,
         animationSpec = tween(durationMillis = 5000), // 2 seconds duration
         label = ""
     )

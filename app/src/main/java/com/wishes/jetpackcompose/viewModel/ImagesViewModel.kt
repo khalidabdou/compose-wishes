@@ -25,8 +25,10 @@ import com.wishes.jetpackcompose.utlis.Resource
 import com.wishes.jetpackcompose.utlis.integrateAds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -50,6 +52,8 @@ class ImagesViewModel @Inject constructor(
     private val _ads = MutableStateFlow<List<NativeAd>>(emptyList())
     val ads = _ads.asStateFlow()
 
+    private val _navigationEvent = MutableSharedFlow<Unit>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
 
     private val _images = MutableStateFlow<Resource<Latest>>(Resource.Loading())
     //val latest: StateFlow<Resource<Latest>> = _images.asStateFlow()
@@ -383,8 +387,9 @@ class ImagesViewModel @Inject constructor(
     fun saveLanguage(appLanguage: AppLanguage) {
         viewModelScope.launch {
             //_language.emit(appLanguage)
-            _imagesFetched.value = false
             settingRepository.saveLanguage(appLanguage)
+            _imagesFetched.value = false
+            _navigationEvent.emit(Unit)
         }
     }
 

@@ -101,7 +101,7 @@ class ClientApiManager @Inject constructor(
         //val language = "en "
         val token = ""//myDataStore.getToken.first()
         val language = myDataStore.read<AppLanguage>("appLanguage", AppLanguage(0,"","")).first()?.name
-        Log.d("token",token.toString())
+        Log.d("language", language.toString())
 
 
         try {
